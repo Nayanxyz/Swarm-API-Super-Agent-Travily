@@ -1,0 +1,9 @@
+.venv
+.env
+.idea
+
+# Ignore Python cache files
+__pycache__/
+
+# Ignore the local database folder (the cloud will build its own)
+chroma_collection/

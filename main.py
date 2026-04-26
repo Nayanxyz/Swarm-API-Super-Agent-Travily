@@ -7,6 +7,7 @@ import chromadb
 import re
 from dotenv import load_dotenv
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware # 1. Import the tool, to run the node.js file from render
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
@@ -16,6 +17,16 @@ CLOUD_URL = "https://api.groq.com/openai/v1/chat/completions"
 # 1. API INITIALIZATION & MEMORY STORE
 # ==========================================
 app = FastAPI(title="Enterprise Swarm API", version="1.0")
+
+# 2. Add the Security Unlocker:
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # The "*" means "Allow ANY website to talk to me"
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow POST, GET, etc.
+    allow_headers=["*"],
+)
+
 
 # [API UPGRADE]: We replace st.session_state with a dictionary to hold multiple users.
 active_sessions = {}

@@ -8,7 +8,7 @@ st.title("🐝 Enterprise AI Swarm")
 
 # === 2. API CONNECTION (THE BRIDGE) ===
 # [IMPORTANT]: Paste your actual Render URL here. Make sure it ends in /chat!
-API_URL = "https://super-agent-0ycr.onrender.com/chat"
+API_URL = "https://swarm-api-super-agent-travily.onrender.com/chat"
 
 # === 3. SESSION MEMORY ===
 # We need to give this specific browser window a unique ID so the API remembers who we are.

@@ -44,3 +44,7 @@ async def on_message(message):
                 "prompt": prompt
             }
 
+            try:
+                # Send the package to the Render Kitchen
+                response = requests.post(API_URL, json=payload)
+

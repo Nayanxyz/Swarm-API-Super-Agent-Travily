@@ -35,3 +35,12 @@ async def on_message(message):
         # Strip the @mention tag out of the text so the API only gets the question
         prompt = message.content.replace(f'<@{client.user.id}>', '').strip()
 
+        # Show the "Bot is typing..." animation in Discord
+        async with message.channel.typing():
+
+            # THE MAGIC: We use the user's real Discord ID to keep their memories separate!
+            payload = {
+                "user_id": str(message.author.id),
+                "prompt": prompt
+            }
+

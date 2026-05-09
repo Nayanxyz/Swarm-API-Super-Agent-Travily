@@ -60,3 +60,5 @@ async def on_message(message):
                 await message.reply("Failed to connect to the cloud brain.")
 
 
+# Turn on the power
+client.run(TOKEN)

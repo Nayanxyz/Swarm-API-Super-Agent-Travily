@@ -22,3 +22,10 @@ async def on_ready():
     print(f"✅ {client.user} has connected to Discord and is listening!")
 
 
+# === 3. EVENT: A MESSAGE IS SENT ===
+@client.event
+async def on_message(message):
+    # Ignore messages sent by the bot itself
+    if message.author == client.user:
+        return
+

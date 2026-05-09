@@ -16,3 +16,9 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 
+# === 2. EVENT: BOT WAKES UP ===
+@client.event
+async def on_ready():
+    print(f"✅ {client.user} has connected to Discord and is listening!")
+
+

@@ -106,3 +106,13 @@ Step 5: Event 2 - Hearing a Message
     Usage: We check the message.mentions list (a list of everyone tagged in the text). If our bot's name is in that list,
             we proceed. If not, the bot ignores the message and lets human friends talk in peace.
 
+    Cleaning the Data--
+
+        Python:
+                prompt = message.content.replace(f'<@{client.user.id}>', '').strip()
+
+    Usage: If you type @Super Agent Swarm Hello!, the actual text Discord sees is <@123456789> Hello!.
+
+    .replace() and .strip(): We use these string methods to cut the ugly tag out of the text and delete any extra spaces,
+                             leaving us with a clean prompt variable containing just: "Hello!"
+

@@ -116,3 +116,22 @@ Step 5: Event 2 - Hearing a Message
     .replace() and .strip(): We use these string methods to cut the ugly tag out of the text and delete any extra spaces,
                              leaving us with a clean prompt variable containing just: "Hello!"
 
+    The Cloud Connection (The Bridge)--
+
+        Python
+                async with message.channel.typing():
+
+    Usage: This is a beautiful UI feature. It tells Discord to show the little "Super Agent Swarm is typing..."
+           animation in the channel. Because it's an async with block, it keeps animating automatically while the rest of the code runs.
+
+        Python:
+
+            payload = {
+                "user_id": str(message.author.id),
+                "prompt": prompt
+            }
+
+    Usage: This is where we build the Pydantic package for your Render API. We grab the human's unique Discord ID
+           (message.author.id), convert it to a string, and pack it with their question.
+           This ensures perfect memory separation on the backend.
+

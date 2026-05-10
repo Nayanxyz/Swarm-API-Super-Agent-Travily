@@ -37,3 +37,24 @@ Step 2: Configuration & Security
 
     API_URL: This is just a string variable. It is the exact GPS coordinate of your Render "Kitchen."
 
+Step 3: Building the Bot's Body & Senses (Classes)
+
+    Discord values privacy. If you just drop a bot into a server, it is blind and deaf by default.
+    We have to explicitly give it "Intents" (senses).
+
+    Python:
+
+        intents = discord.Intents.default()
+        intents.message_content = True
+        client = discord.Client(intents=intents)
+
+    discord.Intents.default(): Intents is a Class (a blueprint). We are asking Discord for the default set of permissions
+                               (like seeing when people log in or out).
+
+    intents.message_content = True: This is crucial. We are modifying a property of the Intents class. We are explicitly
+                                    turning ON the bot's ability to read the actual text people type.
+
+    discord.Client(intents=intents): Client is a massive Class. Think of Client as the physical, robotic body of your bot.
+                                     We are building this robot body and plugging the intents (senses) we just defined into
+                                     its head. We name this robot client.
+

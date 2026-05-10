@@ -58,3 +58,22 @@ Step 3: Building the Bot's Body & Senses (Classes)
                                      We are building this robot body and plugging the intents (senses) we just defined into
                                      its head. We name this robot client.
 
+Step 4: Event 1 - Waking Up
+
+    In Discord programming, bots don't run top-to-bottom like a normal script. They sit in a loop waiting for Events to happen.
+
+    Python:
+
+        @client.event
+        async def on_ready():
+            print(f"✅ {client.user} has connected to Discord and is listening!")
+
+    @client.event: This is called a Decorator. Think of it like a tripwire. We attach this tripwire to our client robot.
+
+    async def: async stands for asynchronous. It means "do this in the background without freezing the rest of the program."
+
+    on_ready(): This is a built-in Discord event. The moment your bot successfully logs into Discord's servers,
+                this tripwire snaps, and it triggers the code inside.
+
+    client.user: This grabs the bot's username (e.g., Super Agent Swarm#1234) and prints it to your terminal so you know it's alive.
+

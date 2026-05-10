@@ -1,0 +1,22 @@
+Step 1: The Imports (Gathering the Tools)
+
+    Before we build anything, we need to bring in our toolboxes.
+
+    Python:
+
+        import discord
+        import requests
+        import os
+        from dotenv import load_dotenv
+
+    import discord: This brings in the official Discord library. It contains all the blueprints for
+                    connecting to Discord's servers, reading messages, and typing in channels.
+
+    import requests: This is our "Courier." It is the library we use to send data packages
+                      over the internet to your Render API.
+
+    import os: This stands for Operating System. It allows our Python script to look inside your
+               computer's folders and read hidden files.
+
+    from dotenv import load_dotenv: This is our lockpick. It allows Python to open and read your hidden .env file
+                                    where your passwords are kept.

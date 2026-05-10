@@ -135,3 +135,10 @@ Step 5: Event 2 - Hearing a Message
            (message.author.id), convert it to a string, and pack it with their question.
            This ensures perfect memory separation on the backend.
 
+        Python:
+                try:
+                    response = requests.post(API_URL, json=payload)
+
+    Usage: The Courier takes flight. We use the requests library to send a POST request to your Render API_URL,
+           carrying the payload box. The code pauses right here and waits for Render to finish thinking.
+

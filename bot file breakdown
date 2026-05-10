@@ -151,3 +151,25 @@ Step 5: Event 2 - Hearing a Message
            the final_answer string, and use await message.reply() to make the bot drop the answer directly into the Discord channel,
            tagging the user who asked.
 
+Step 6: The Ignition
+
+        Python:
+            client.run(TOKEN)
+
+    Usage: None of the code above actually runs until this final line. client.run is the ignition switch.
+           It takes your secret password (TOKEN), connects the robot body (client) to the internet, and starts the infinite listening loop.
+
+    🚧 Problems Faced During bot.py Setup
+
+    As requested, here are the specific engineering roadblocks we hit while building this file, and how they connect to the code:
+
+    1. The "Blind Bot" Problem (Relates to Step 3)
+
+    What happened: You successfully invited the bot to your server, but when you typed messages, it completely ignored you.
+
+    The Cause: Discord recently updated their security policies to prevent bots from secretly reading user data.
+               Even though our code had intents.message_content = True, Discord blocked it on their end.
+
+    The Fix: We had to go into the Discord Developer Portal (the "Back of House") and manually flip the
+             "Message Content Intent" switch to grant the bot 20/20 vision.
+

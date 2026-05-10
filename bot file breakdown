@@ -89,3 +89,20 @@ Step 5: Event 2 - Hearing a Message
     on_message(message): Whenever a message is sent, Discord grabs all the data (who sent it, what time,
                          what channel, what the text was) and stuffs it into a package called message.
 
+    The Filters (Ignoring the Noise)--
+
+    Because the bot hears everything, we must tell it what to ignore.
+
+        Python:
+            if message.author == client.user:
+                return
+
+    Usage: If the bot sends a message, it will hear its own message and try to reply to itself in an infinite loop.
+           This tells it: "If the author of the message is you (client.user), return (stop reading and go back to sleep)."
+
+        Python:
+            if client.user in message.mentions:
+
+    Usage: We check the message.mentions list (a list of everyone tagged in the text). If our bot's name is in that list,
+            we proceed. If not, the bot ignores the message and lets human friends talk in peace.
+

@@ -173,3 +173,12 @@ Step 6: The Ignition
     The Fix: We had to go into the Discord Developer Portal (the "Back of House") and manually flip the
              "Message Content Intent" switch to grant the bot 20/20 vision.
 
+    2. The "Staging Environment" Disconnect (Relates to Step 2)
+
+    What happened: When you built your second Swarm (Multi-Tenancy), the new bot wouldn't answer you.
+
+    The Cause: You cloned the folder, but bot.py was still pointing to the API_URL of your first Render server,
+               and it was missing the new .env token.
+
+    The Fix: You updated the API_URL string on Line 10 to point to the new Kitchen, and ran python
+             bot.py to turn the ignition key on the new client.

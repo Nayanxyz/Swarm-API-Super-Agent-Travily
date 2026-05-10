@@ -142,3 +142,12 @@ Step 5: Event 2 - Hearing a Message
     Usage: The Courier takes flight. We use the requests library to send a POST request to your Render API_URL,
            carrying the payload box. The code pauses right here and waits for Render to finish thinking.
 
+        Python:
+                if response.status_code == 200:
+                    data = response.json()
+                    await message.reply(data["final_answer"])
+
+    Usage: If Render replies with a 200 (Internet code for "Success"), we unpack the JSON box, extract
+           the final_answer string, and use await message.reply() to make the bot drop the answer directly into the Discord channel,
+           tagging the user who asked.
+

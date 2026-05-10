@@ -77,3 +77,15 @@ Step 4: Event 1 - Waking Up
 
     client.user: This grabs the bot's username (e.g., Super Agent Swarm#1234) and prints it to your terminal so you know it's alive.
 
+Step 5: Event 2 - Hearing a Message
+
+    This is the main engine of the bot. Every single time anyone sends any message in the server, this tripwire snaps.
+
+    Python:
+
+        @client.event
+        async def on_message(message):
+
+    on_message(message): Whenever a message is sent, Discord grabs all the data (who sent it, what time,
+                         what channel, what the text was) and stuffs it into a package called message.
+

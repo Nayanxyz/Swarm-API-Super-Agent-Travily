@@ -61,3 +61,17 @@ Part 1: The Core Concepts & Architecture
         🚧 Problem we faced: The Math & Wifi Bug. When DuckDuckGo failed to find the weather in Indore,
                              the AI panicked and randomly reminded you that 15*4=60 and the wifi password was BlueMonkey42!
 
+    5. Multi-Tenancy (Staging Environments)
+
+        What it is: Creating an exact clone of your entire architecture so you have a safe "playground"
+                    to test new features without breaking the main app.
+
+        How we did it: You copied your files to a new folder, created a second Render web service,
+                       and built a second Discord bot.
+
+        Usage/Example: Game developers have the "Live Server" (where players play) and
+                       the "Test Server" (where devs test new weapons).
+
+        🚧 Problem we faced: The Environment Variable Trap. When you cloned the code, you forgot to copy
+                              the TAVILY_API_KEY into the new Render dashboard, causing the new bot to fail.
+

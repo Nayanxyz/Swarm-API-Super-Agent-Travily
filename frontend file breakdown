@@ -14,3 +14,12 @@ Block 1: The Canvas Setup
 
     The Config: This tells the web browser what to name the tab at the top of your screen and draws the main title on the webpage.
 
+Block 2: The Bridge
+
+    Python:
+
+        API_URL = "https://your-render-app-name.onrender.com/chat"
+
+What it is: This is the exact GPS coordinate of the backend brain you just deployed. Whenever the frontend needs to think,
+            it will package data and mail it to this address.
+

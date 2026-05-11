@@ -8,10 +8,27 @@ import re
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware # 1. Import the tool, to run the node.js file from render
+from supabase import create_client, Client # Tool ko mangwaya
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")
 CLOUD_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+# SUPABASE DATABASE
+# 1. Address aur Chabi (Variables)
+url = os.getenv("SUPABASE_URL")
+key = os.getenv("SUPABASE_KEY")
+
+# 2. Bridge banana (Initialization)
+supabase: Client = create_client(url, key)
+
+                        # --- TEST CODE START ---
+                        # try:
+                        #     test_response = supabase.table("messages").insert({"content": "Test Message", "role": "user"}).execute()
+                        #     print("✅ Connection Success! Database mein message chala gaya.")
+                        # except Exception as e:
+                        #     print(f"❌ Connection Failed! Error: {e}")
+                        # --- TEST CODE END ---
 
 # ==========================================
 # 1. API INITIALIZATION & MEMORY STORE
@@ -180,6 +197,17 @@ async def chat_with_swarm(request: UserRequest):
     user_history = active_sessions[request.user_id]
     user_history.append({"role": "user", "content": request.prompt})
 
+    # --- NAYI LINE: Supabase mein User ka message bhejo ---
+    try:
+        supabase.table("messages").insert({
+            "user_id": request.user_id,
+            "role": "user",
+            "content": request.prompt
+        }).execute()
+        print("[DB LOG] User message saved to Supabase")
+    except Exception as e:
+        print(f"[DB ERROR] User message fail: {e}")
+
     # 2. Background Janitor
     if len(user_history) > 6:
         print(f"[SERVER LOG] Compressing memory for {request.user_id}...")
@@ -242,6 +270,17 @@ USER PROMPT: {request.prompt}"""
 
     # 6. Final Commit & Return Payload
     user_history.append({"role": "assistant", "content": ai_words})
+
+    # --- NAYI LINE: Supabase mein AI ka message bhejo ---
+    try:
+        supabase.table("messages").insert({
+            "user_id": request.user_id,
+            "role": "assistant",
+            "content": ai_words
+        }).execute()
+        print("[DB LOG] AI response saved to Supabase")
+    except Exception as e:
+        print(f"[DB ERROR] AI response fail: {e}")
 
     print("--- REQUEST COMPLETE ---")
 

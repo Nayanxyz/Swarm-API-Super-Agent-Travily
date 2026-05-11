@@ -1,0 +1,16 @@
+Block 1: The Canvas Setup
+
+    Python:
+
+        import streamlit as st
+        import requests
+        import uuid
+
+    st.set_page_config(page_title="Enterprise Swarm", page_icon="🐝")
+    st.title("🐝 Enterprise AI Swarm")
+
+    The Imports: We import streamlit (the UI painter), requests (our internet phone to call your Render API),
+                 and uuid (a tool to generate random, unique ID numbers).
+
+    The Config: This tells the web browser what to name the tab at the top of your screen and draws the main title on the webpage.
+

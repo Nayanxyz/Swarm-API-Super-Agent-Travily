@@ -4,3 +4,4 @@ pydantic
 requests
 chromadb
 python-dotenv
+supabase

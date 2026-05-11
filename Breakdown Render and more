@@ -16,3 +16,18 @@ Part 1: The Core Concepts & Architecture
                               We solved this by realizing that if we trapped the AI inside Streamlit, Discord would
                               never be able to talk to it.
 
+    2. Cloud Server Lifecycles & The "Heartbeat" Hack
+
+        What it is: Cloud providers (like Render) turn off free servers if no one visits them for 15 minutes
+                    to save electricity. When a user finally visits, the server has to boot up from scratch.
+
+        How we did it: We created a "Heartbeat" by using UptimeRobot. We built a tiny "Front Lobby" endpoint
+                       (@app.get("/")) and told the robot to visit that lobby every 5 minutes.
+
+        Usage/Example: Like a motion-sensor light in a hallway. Render turns the lights off if the hallway is
+                       empty. UptimeRobot acts like a dog running down the hallway every 5 minutes to keep the lights on permanently.
+
+        🚧 Problem we faced: The Cold Start Delay. You asked, "Why did it take so long to say 'how are you?'"
+                              It took 45 seconds because Render was asleep and had to boot up the Linux machine,
+                              Python, and the database.
+

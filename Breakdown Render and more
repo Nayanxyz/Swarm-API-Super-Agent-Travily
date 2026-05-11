@@ -46,3 +46,18 @@ Part 1: The Core Concepts & Architecture
         🚧 Problem we faced: The Web Search Crash. DuckDuckGo blocked Render, resulting in the code printing:
                              "No web data could be retrieved."
 
+    4. The "Memory Bleed" (AI Hallucination)
+
+        What it is: Language models (like Llama 3.1) absolutely hate silence. If they are asked a question
+                    but their data pipeline breaks, they panic. Instead of saying "I don't know," they will look
+                    at old chat history and randomly blurt out unrelated facts to seem helpful.
+
+        How we did it: We didn't code this; it's a psychological quirk of AI! We fixed it by ensuring
+                       the Web Scraper (Tavily) successfully handed the AI real data so it didn't have to panic.
+
+        Usage/Example: If you ask a student a question they don't know the answer to, they might nervously
+                        repeat a fact you taught them 10 minutes ago just to say something.
+
+        🚧 Problem we faced: The Math & Wifi Bug. When DuckDuckGo failed to find the weather in Indore,
+                             the AI panicked and randomly reminded you that 15*4=60 and the wifi password was BlueMonkey42!
+

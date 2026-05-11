@@ -115,3 +115,18 @@ Part 2: Demystifying the Code (frontend.py)
                      Then, we hire a courier (requests.post) to fly that box over the internet to your Render URL.
                      The script pauses and waits for Render to do the AI math and send the answer back.
 
+Part 3: Demystifying the Code (bot.py)
+
+        The Discord bot is just a different "Face" for the same "Brain." However, Discord operates like a crowded room,
+        so the code has to handle multiple people talking at once.
+
+    Step 1: The Security Badge (Intents)
+
+        The Code: intents.message_content = True
+
+        Explanation: Discord values privacy. A bot cannot read what your friends type unless you explicitly turn on
+                     the "Message Content Intent" in the Developer Portal and in the code.
+
+        🚧 Problem we faced: The Sleeping Bot. You added the bot to the server, but it ignored you because we forgot
+                              to give it permission to read the text channels!
+

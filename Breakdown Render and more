@@ -100,3 +100,10 @@ Part 2: Demystifying the Code (frontend.py)
         Explanation: After Streamlit wipes the screen blank, this loop quickly reads the notebook and
                      repaints every past chat bubble back onto the screen instantly.
 
+    Step 3: The Action Trigger
+
+        The Code: if prompt := st.chat_input("Ask a question"):
+
+        Explanation: This creates the typing box. When you press Enter, it grabs your text, saves it as
+                     the word prompt, and triggers the API call.
+

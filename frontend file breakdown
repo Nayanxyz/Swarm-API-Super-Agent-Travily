@@ -100,3 +100,20 @@ Block 5: The Action Trigger
     What it does: This is the climax. We pack the cardboard box exactly how Pydantic demanded: the random user_id
                   from the notebook, and the prompt. We use requests.post to fire that box over the internet to your
                   Render server. The script pauses here and waits for Render to reply.
+
+    Python:
+
+        if response.status_code == 200:
+            data = response.json()
+            answer = data["final_answer"]
+            routing = data["manager_routing"]
+
+            st.markdown(answer)
+            st.caption(f"🛣️ *System routed via: {routing}*")
+
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+
+    What it does: If the server replies successfully (200 OK), we rip open the SwarmResponse package. We extract
+                  the final_answer and the manager_routing string. We write the answer in the chat bubble, draw the cool
+                  routing badge below it, and finally—most importantly—we save the AI's answer into the notebook so
+                  the painter doesn't forget it on the next turn.

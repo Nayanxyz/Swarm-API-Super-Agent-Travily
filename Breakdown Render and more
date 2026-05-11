@@ -1,0 +1,18 @@
+Part 1: The Core Concepts & Architecture
+
+    `1. Decoupled Architecture (Client-Server)
+
+        What it is: Separating your application into two distinct pieces: the "Brain" (Backend/Server)
+                    and the "Face" (Frontend/Client).
+
+        How we did it: We put your AI logic, FastAPI, and ChromaDB on Render (The Brain). Then, we built separate
+                       apps using Streamlit and Discord on your computer (The Faces).
+
+        Usage/Example: Think of a restaurant. Render is the Kitchen. It only cooks data. Streamlit is
+                       the Waiter in the dining room, and Discord is the Drive-Thru window. Because the Kitchen
+                       is independent, both the Waiter and the Drive-Thru can order food from it at the exact same time.
+
+        🚧 Problem we faced: Initial Confusion. You asked, "Why do we even need Render if Streamlit can run Python?"
+                              We solved this by realizing that if we trapped the AI inside Streamlit, Discord would
+                              never be able to talk to it.
+

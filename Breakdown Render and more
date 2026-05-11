@@ -75,3 +75,21 @@ Part 1: The Core Concepts & Architecture
         🚧 Problem we faced: The Environment Variable Trap. When you cloned the code, you forgot to copy
                               the TAVILY_API_KEY into the new Render dashboard, causing the new bot to fail.
 
+Part 2: Demystifying the Code (frontend.py)
+
+        Streamlit is incredibly fast, but it has a unique quirk: Every time you click a button or type a message,
+        it completely wipes the screen blank and restarts the script from Line 1. Here is how we engineered frontend.py to handle that:
+
+    Step 1: The Permanent Notebook (st.session_state)
+
+        Because Streamlit gets amnesia every second, we have to give it a permanent notebook to write things down.
+
+        The Code: if "session_id" not in st.session_state:
+
+        Explanation: We tell Streamlit, "Check your notebook. Do you have a session ID? If not,
+                     use the uuid library to generate a random nametag (like 'abc-123') and write it down."
+
+        Why we did it: Your Render API needs to know who is talking so it can separate memories. We send this UUID with every message.
+
+        The History: We also create a blank list called st.session_state.messages to permanently store the chat history.
+

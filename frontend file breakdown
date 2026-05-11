@@ -47,3 +47,18 @@ Block 3: The Painter's Notebook (Session State)
     What it does: We check the notebook for a chat history. If it's empty, we create a blank list [].
                   This list will hold a record of every message sent and received, so the painter knows what to draw.
 
+Block 4: Drawing the History
+
+    Python:
+
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+    What it does: Remember, Streamlit wipes the screen constantly. If you have a 10-message conversation,
+                  how does it stay on screen?
+
+    The Logic: Streamlit loops through the messages notebook. For every message, it opens a visual chat bubble
+               (st.chat_message) and writes the text inside it (st.markdown). It repaints the entire history
+               in a fraction of a millisecond.
+

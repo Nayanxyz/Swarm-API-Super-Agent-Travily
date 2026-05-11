@@ -88,3 +88,15 @@ Block 5: The Action Trigger
             with st.spinner("The Swarm is thinking..."):
 
     What it does: We draw an empty AI chat bubble on the screen, and put a spinning loading wheel inside it.
+
+    Python:
+
+        payload = {
+            "user_id": st.session_state.session_id,
+            "prompt": prompt
+        }
+        response = requests.post(API_URL, json=payload)
+
+    What it does: This is the climax. We pack the cardboard box exactly how Pydantic demanded: the random user_id
+                  from the notebook, and the prompt. We use requests.post to fire that box over the internet to your
+                  Render server. The script pauses here and waits for Render to reply.

@@ -23,3 +23,27 @@ Block 2: The Bridge
 What it is: This is the exact GPS coordinate of the backend brain you just deployed. Whenever the frontend needs to think,
             it will package data and mail it to this address.
 
+Block 3: The Painter's Notebook (Session State)
+
+    Because Streamlit forgets everything every time the screen refreshes, we have to give it a permanent notebook
+    to write things down in. In Streamlit, this notebook is called st.session_state. Anything saved in here survives the screen wipes.
+
+    Python:
+
+        if "session_id" not in st.session_state:
+            st.session_state.session_id = str(uuid.uuid4())
+
+    What it does: Remember your backend FastAPI code? Pydantic demands a user_id so it can find the right file folder in active_sessions.
+
+    The Logic: We tell Streamlit, "Look in your notebook. Do you have a session ID? If not, use UUID to generate a random
+               string (like '8f3a-4b21...') and save it." Now, every time this specific user sends a message, they send
+               this exact ID, so the backend knows who they are.
+
+    Python:
+
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+    What it does: We check the notebook for a chat history. If it's empty, we create a blank list [].
+                  This list will hold a record of every message sent and received, so the painter knows what to draw.
+

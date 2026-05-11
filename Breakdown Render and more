@@ -93,3 +93,10 @@ Part 2: Demystifying the Code (frontend.py)
 
         The History: We also create a blank list called st.session_state.messages to permanently store the chat history.
 
+    Step 2: Drawing the Chat History
+
+        The Code: for msg in st.session_state.messages:
+
+        Explanation: After Streamlit wipes the screen blank, this loop quickly reads the notebook and
+                     repaints every past chat bubble back onto the screen instantly.
+

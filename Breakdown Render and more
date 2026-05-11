@@ -130,3 +130,29 @@ Part 3: Demystifying the Code (bot.py)
         🚧 Problem we faced: The Sleeping Bot. You added the bot to the server, but it ignored you because we forgot
                               to give it permission to read the text channels!
 
+    Step 2: The Filter
+
+        The Code: if message.author == client.user: return
+
+        Explanation: Imagine a bot saying "Hello!" and then hearing its own "Hello!" and replying to itself infinitely.
+                     This line tells the bot: "If the person who sent the message is YOU, ignore it."
+
+    Step 3: The Target (Mentions)
+
+        The Code: if client.user in message.mentions:
+
+        Explanation: In a crowded Discord server, friends are talking to each other. You don't want the AI interrupting
+                     every human conversation. This line tells the bot to stay asleep unless someone specifically tags
+                     its name (e.g., @Super Agent Swarm).
+
+    Step 4: The Perfect Memory Mapping
+
+        The Code: "user_id": str(message.author.id)
+
+        Explanation: This is the most brilliant part of the Discord integration. Discord assigns every human on
+                     earth a unique ID number. Instead of generating a random UUID like we did in Streamlit, we just
+                     pass the user's real Discord ID directly to the Render API.
+
+        Why we did it: This means if you and your friend are both talking to the bot in the exact same chat channel at
+                       the exact same time, Render will automatically create two separate folders in its memory.
+                       It will never mix up your conversation with your friend's conversation!

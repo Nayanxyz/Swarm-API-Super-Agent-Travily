@@ -107,3 +107,11 @@ Part 2: Demystifying the Code (frontend.py)
         Explanation: This creates the typing box. When you press Enter, it grabs your text, saves it as
                      the word prompt, and triggers the API call.
 
+    Step 4: The Bridge (Sending the Data)
+
+        The Code: response = requests.post(API_URL, json=payload)
+
+        Explanation: We pack your UUID nametag and your text prompt into a box called payload.
+                     Then, we hire a courier (requests.post) to fly that box over the internet to your Render URL.
+                     The script pauses and waits for Render to do the AI math and send the answer back.
+

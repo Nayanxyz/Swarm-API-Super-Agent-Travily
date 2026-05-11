@@ -31,3 +31,18 @@ Part 1: The Core Concepts & Architecture
                               It took 45 seconds because Render was asleep and had to boot up the Linux machine,
                               Python, and the database.
 
+    3. Cloud Blockades & Enterprise Data Pipelines
+
+        What it is: Websites like Google and DuckDuckGo have heavy security. They allow laptops to search
+                    the web, but if they detect a massive cloud data-center (like Render) trying to search,
+                    they assume it's a malicious hacker and block the connection.
+
+        How we did it: We ripped out the consumer-grade DuckDuckGo scraper and replaced it with Tavily,
+                       an Enterprise API specifically designed to bypass cloud blockades for AI agents.
+
+        Usage/Example: DuckDuckGo is like a bouncer checking IDs. Render's ID says "Robot," so it gets kicked out.
+                       Tavily is a VIP pass specifically made for AI robots.
+
+        🚧 Problem we faced: The Web Search Crash. DuckDuckGo blocked Render, resulting in the code printing:
+                             "No web data could be retrieved."
+

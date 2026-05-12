@@ -122,7 +122,17 @@ def send_to_cloud_ai(history_list):
     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
     payload = {"model": "llama-3.1-8b-instant", "messages": history_list, "temperature": 0.7}
     response = requests.post(CLOUD_URL, headers=headers, json=payload)
-    return response.json()["choices"][0]["message"]["content"]
+    data = response.json()
+
+    # --- THE SAFETY SHIELD ---
+    if "choices" in data:
+        # Agar sab theek hai, toh normal answer return karo
+        return data["choices"][0]["message"]["content"]
+    else:
+        # Agar Groq API limit ya memory error de, toh crash hone se bachao
+        print(f"[API DANGER] Groq Error: {data}")
+        error_msg = data.get('error', {}).get('message', 'Unknown Groq API Error')
+        return f"Arre yaar, AI thak gaya hai (Groq Limit reached). Kuch seconds baad try karo! Error: {error_msg}"
 
 
 def compress_memory(history_list):

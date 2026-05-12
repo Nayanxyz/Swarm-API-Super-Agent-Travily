@@ -186,12 +186,40 @@ async def root():
 async def chat_with_swarm(request: UserRequest):
     print(f"\n--- NEW REQUEST FROM [{request.user_id}] ---")
 
-    # [API UPGRADE]: Pull up the specific user's memory, or create a new one if they are new
+    # Instead just prompt we used following
+
+                #  [API UPGRADE]: Pull up the specific user's memory, or create a new one if they are new
+                # if request.user_id not in active_sessions:
+                #     active_sessions[request.user_id] = [
+                #         {"role": "system",
+                #          "content": "You are the Senior Synthesis AI. Answer clearly using the provided system data."}
+                #     ]
+
+    # [API UPGRADE]: Load memory from Supabase OR create a new one
     if request.user_id not in active_sessions:
+        print(f"[DB LOG] Checking Supabase for past history of {request.user_id}...")
+
+        # 1. Supabase se history mango
+        try:
+            db_response = supabase.table("messages").select("*").eq("user_id", request.user_id).execute()
+            past_messages = db_response.data
+        except Exception as e:
+            print(f"[DB ERROR] Could not read memory: {e}")
+            past_messages = []
+
+        # 2. Base System Prompt lagao
         active_sessions[request.user_id] = [
             {"role": "system",
              "content": "You are the Senior Synthesis AI. Answer clearly using the provided system data."}
         ]
+
+        # 3. Agar purani history mili, toh usko RAM mein load karo
+        if len(past_messages) > 0:
+            print(f"[DB LOG] Found {len(past_messages)} past messages! Loading into RAM...")
+            for msg in past_messages:
+                active_sessions[request.user_id].append({"role": msg["role"], "content": msg["content"]})
+        else:
+            print("[DB LOG] New user. No past history found.")
 
     # 1. Commit user message to their specific memory
     user_history = active_sessions[request.user_id]

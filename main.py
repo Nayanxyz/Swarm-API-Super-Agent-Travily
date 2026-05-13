@@ -336,4 +336,7 @@ USER PROMPT: {request.prompt}"""
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8009, reload=True)
+    # Dynamically grab the port Render assigns, or default to 8000 for your local machine
+    port = int(os.environ.get("PORT", 8009))
+    # Remove 'reload=True' in production. It wastes memory and is only for local dev.
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

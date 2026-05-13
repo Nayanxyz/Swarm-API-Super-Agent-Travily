@@ -365,6 +365,39 @@ USER PROMPT: {request.prompt}"""
     )
 
 
+@app.post("/upload-doc")
+async def upload_company_document(doc: DocumentUpload):
+    print("\n--- NEW DOCUMENT UPLOAD REQUEST ---")
+
+    # 1. Basic Security Gate
+    # DO NOT hardcode passwords in production. We use environment variables.
+    # Add ADMIN_SECRET_PASSWORD to your .env and Render variables.
+    secure_password = os.getenv("ADMIN_SECRET_PASSWORD", "supersecret123")
+    if doc.admin_password != secure_password:
+        print("[SECURITY ALERT] Unauthorized upload attempt.")
+        return {"status": "error", "message": "Unauthorized. Incorrect admin password."}
+
+    # 2. Translate English to Math (Vector)
+    print(f"[SERVER LOG] Translating document to vector: {doc.content[:30]}...")
+    vector_math = get_embedding(doc.content)
+
+    if not vector_math:
+        return {"status": "error", "message": "Failed to translate document into a vector."}
+
+    # 3. Save to Supabase pgvector Vault
+    try:
+        supabase.table("company_docs").insert({
+            "content": doc.content,
+            "embedding": vector_math
+        }).execute()
+
+        print("[DB LOG] Document successfully secured in vault.")
+        return {"status": "success", "message": "Document uploaded and embedded successfully."}
+
+    except Exception as e:
+        print(f"[DB ERROR] Failed to save document: {e}")
+        return {"status": "error", "message": f"Database error: {str(e)}"}
+
 if __name__ == "__main__":
     # Dynamically grab the port Render assigns, or default to 8000 for your local machine
     port = int(os.environ.get("PORT", 8009))

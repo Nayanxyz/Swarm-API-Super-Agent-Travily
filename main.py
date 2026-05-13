@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import uvicorn
 import os
 import requests
-import chromadb
+# import chromadb
 import re
 from dotenv import load_dotenv
 from datetime import datetime
@@ -48,14 +48,15 @@ app.add_middleware(
 # [API UPGRADE]: We replace st.session_state with a dictionary to hold multiple users.
 active_sessions = {}
 
-# Initialize ChromaDB once when the server boots up
-client = chromadb.Client()
-collection = client.get_or_create_collection(name="chroma_collection")
-# Safe add: We use get_or_create so it doesn't crash if it already exists
-try:
-    collection.add(documents=["The company wifi password is 'BlueMonkey42'."], ids=["doc1"])
-except:
-    pass
+# used supabase rpc and hugging face for RAG, dont need chromaDB
+# # Initialize ChromaDB once when the server boots up
+# client = chromadb.Client()
+# collection = client.get_or_create_collection(name="chroma_collection")
+# # Safe add: We use get_or_create so it doesn't crash if it already exists
+# try:
+#     collection.add(documents=["The company wifi password is 'BlueMonkey42'."], ids=["doc1"])
+# except:
+#     pass
 
 
 # ==========================================

@@ -138,7 +138,11 @@ def send_to_cloud_ai(history_list):
 def compress_memory(history_list):
     compression_payload = [
         {"role": "system",
-         "content": "You are a backend memory manager. Generate a detailed 'Running Fact Sheet' from the log."},
+         "content": """You are an expert backend memory manager. Create a detailed 'Running Fact Sheet' from the conversation log.
+CRITICAL RULES:
+1. NEVER forget or summarize away the user's name.
+2. Save all personal facts, preferences, and important context explicitly.
+3. Keep it precise and structured."""},
         {"role": "user", "content": str(history_list)}
     ]
     return send_to_cloud_ai(compression_payload)

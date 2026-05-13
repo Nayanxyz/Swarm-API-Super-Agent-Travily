@@ -74,6 +74,30 @@ class SwarmResponse(BaseModel):
 # ==========================================
 # 3. CORE AI FUNCTIONS (Unchanged from Phase 10)
 # ==========================================
+
+def get_embedding(text):
+    """Translates English text into a 384-dimensional mathematical vector."""
+    print(f"[SERVER LOG] Outsourcing embedding translation for: {text[:20]}...")
+
+    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    # Ensure HUGGINGFACE_API_KEY is in your .env / Render Environment Variables
+    hf_key = os.getenv("HUGGINGFACE_API_KEY")
+
+    if not hf_key:
+        print("[ERROR] HuggingFace API Key is missing!")
+        return None
+
+    headers = {"Authorization": f"Bearer {hf_key}"}
+
+    # We ask HuggingFace to translate the text.
+    response = requests.post(api_url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+
+    if response.status_code != 200:
+        print(f"[ERROR] Embedding failed: {response.text}")
+        return None
+
+    return response.json()
+
 def get_manager_decision(user_text):
     orchestrator_prompt = [
         {"role": "system", "content": """You are the Orchestrator. Route the user's input.

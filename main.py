@@ -209,9 +209,12 @@ async def chat_with_swarm(request: UserRequest):
     if request.user_id not in active_sessions:
         print(f"[DB LOG] Checking Supabase for past history of {request.user_id}...")
 
-        # 1. Supabase se history mango
+        # 1. Supabase se history mango (WITH CHRONOLOGICAL ORDERING)
         try:
-            db_response = supabase.table("messages").select("*").eq("user_id", request.user_id).execute()
+            # .order("created_at") lagana bohot zaroori hai taaki timeline seedhi rahe
+            # (Agar aapke table mein 'created_at' nahi hai, toh 'id' likh dena)
+            db_response = supabase.table("messages").select("*").eq("user_id", request.user_id).order("created_at",
+                                                                                                      desc=False).execute()
             past_messages = db_response.data
         except Exception as e:
             print(f"[DB ERROR] Could not read memory: {e}")

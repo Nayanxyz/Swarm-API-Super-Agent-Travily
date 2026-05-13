@@ -83,27 +83,39 @@ class DocumentUpload(BaseModel):
 # ==========================================
 
 def get_embedding(text):
-    """Translates English text into a 384-dimensional mathematical vector."""
     print(f"[SERVER LOG] Outsourcing embedding translation for: {text[:20]}...")
 
-    api_url = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
-    # Ensure HUGGINGFACE_API_KEY is in your .env / Render Environment Variables
-    hf_key = os.getenv("HUGGINGFACE_API_KEY").strip()
+    # The definitive pipeline URL for feature extraction
+    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
 
+    hf_key = os.getenv("HUGGINGFACE_API_KEY", "").strip()
     if not hf_key:
         print("[ERROR] HuggingFace API Key is missing!")
         return None
 
-    headers = {"Authorization": f"Bearer {hf_key}"}
+    headers = {
+        "Authorization": f"Bearer {hf_key}",
+        "Content-Type": "application/json"
+    }
 
-    # We ask HuggingFace to translate the text.
-    response = requests.post(api_url, headers=headers, json={"inputs": text, "options": {"wait_for_model": True}})
+    # The payload MUST be a list of strings for this specific pipeline route
+    payload = {
+        "inputs": [text],
+        "options": {"wait_for_model": True}
+    }
 
-    if response.status_code != 200:
-        print(f"[ERROR] Embedding failed: {response.text}")
+    try:
+        response = requests.post(api_url, headers=headers, json=payload, timeout=15)
+
+        if response.status_code == 200:
+            # The API returns a list of lists. We want the first vector.
+            return response.json()[0]
+        else:
+            print(f"[ERROR] Embedding failed: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"[ERROR] Connection failed: {e}")
         return None
-
-    return response.json()
 
 def get_manager_decision(user_text):
     orchestrator_prompt = [

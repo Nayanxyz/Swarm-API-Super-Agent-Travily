@@ -86,7 +86,7 @@ def get_embedding(text):
     """Translates English text into a 384-dimensional mathematical vector."""
     print(f"[SERVER LOG] Outsourcing embedding translation for: {text[:20]}...")
 
-    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    api_url = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
     # Ensure HUGGINGFACE_API_KEY is in your .env / Render Environment Variables
     hf_key = os.getenv("HUGGINGFACE_API_KEY")
 

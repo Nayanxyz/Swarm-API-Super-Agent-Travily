@@ -88,7 +88,7 @@ def get_embedding(text):
 
     api_url = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
     # Ensure HUGGINGFACE_API_KEY is in your .env / Render Environment Variables
-    hf_key = os.getenv("HUGGINGFACE_API_KEY")
+    hf_key = os.getenv("HUGGINGFACE_API_KEY").strip()
 
     if not hf_key:
         print("[ERROR] HuggingFace API Key is missing!")
@@ -127,19 +127,21 @@ def get_search_query(user_text):
     current_year = datetime.now().year
 
     topic_prompt = [
-        {"role": "system", "content": f"""You are an SEO Search Expert. Today is {today}.
-Your ONLY job is to extract the live news or web search topic from the user's prompt.
-CRITICAL RULES:
-1. IGNORE math equations.
-2. IGNORE internal company questions (passwords, wifi, etc.).
-3. If the user asks about current events, append the year '{current_year}' to the search string.
-4. Output EXACTLY ONE string. Do not talk.
+        {"role": "system", "content": f"""You are a strict SEO Extraction Tool. Today is {today}.
+        Your job is to output a search query ONLY if the user asks about current events, news, or weather.
 
-EXAMPLES:
-User: "What is 5+5 and who won the Super Bowl?" -> "Super Bowl winner {current_year}"
-User: "what is wifi password, Bengal election results, and 8/2?" -> "Bengal election results {current_year}"
-User: "Hello, what is the weather in Tokyo?" -> "Tokyo weather {today}"
-"""},
+        CRITICAL RULES:
+        1. If the user is making small talk (e.g., "Hi", "How are you"), output 'NONE'.
+        2. If the user is asking a math question (e.g., "5+5"), output 'NONE'.
+        3. If the user is asking about internal company data (e.g., "wifi", "ceo"), output 'NONE'.
+        4. Output EXACTLY the search string or the word 'NONE'. 
+        5. DO NOT provide explanations, DO NOT say "No relevant topic".
+
+        EXAMPLES:
+        User: "Hi there" -> NONE
+        User: "What is 10*10?" -> NONE
+        User: "Who is the PM of India?" -> PM of India {current_year}
+        """},
         {"role": "user", "content": user_text}
     ]
 
@@ -323,10 +325,19 @@ async def chat_with_swarm(request: UserRequest):
                 collected_context += "<internal_company_data>\nNo relevant internal documents found.\n</internal_company_data>\n\n"
 
     if "WEB" in decision:
-        optimized_query = get_search_query(request.prompt)
-        if optimized_query != "NONE":
+        optimized_query = get_search_query(request.prompt).strip().upper()
+
+        # ELITE FILTER: Check if it's actually a query or just the AI talking
+        # If it's too long, contains 'NONE', or says "NO RELEVANT", we kill it.
+        forbidden_phrases = ["NONE", "NO RELEVANT", "NOT SPECIFIED", "SORRY"]
+        is_invalid = any(phrase in optimized_query for phrase in forbidden_phrases)
+
+        if not is_invalid and len(optimized_query) > 1:
+            print(f"[SERVER LOG] Valid Search Query Found: {optimized_query}")
             live_data = perform_web_search(optimized_query)
             collected_context += f"<live_web_data query='{optimized_query}'>\n{live_data}\n</live_web_data>\n\n"
+        else:
+            print(f"[SERVER LOG] Web search skipped. Agent returned: {optimized_query}")
 
     if "MATH" in decision:
         math_expression = re.sub(r'[^0-9\+\-\*\/\(\)\.]', '', request.prompt)

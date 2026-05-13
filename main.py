@@ -301,9 +301,25 @@ async def chat_with_swarm(request: UserRequest):
     collected_context = ""
 
     if "RAG" in decision:
-        results = collection.query(query_texts=[request.prompt], n_results=1)
-        # Wrap data in clear XML tags
-        collected_context += f"<internal_company_data>\n{results['documents'][0][0]}\n</internal_company_data>\n\n"
+        print("[SERVER LOG] RAG Department activated. Translating prompt to vector...")
+        # 1. Translate the user's english question into Math (Vector)
+        user_vector = get_embedding(request.prompt)
+
+        if user_vector:
+            print("[SERVER LOG] Searching Supabase Vault...")
+            # 2. Ask Supabase to find the closest matching document
+            results = supabase.rpc(
+                'match_company_docs',
+                {'query_embedding': user_vector, 'match_threshold': 0.3, 'match_count': 1}
+            ).execute()
+
+            # 3. If a match is found, add it to the AI's context
+            if results.data and len(results.data) > 0:
+                doc_content = results.data[0]['content']
+                collected_context += f"<internal_company_data>\n{doc_content}\n</internal_company_data>\n\n"
+                print(f"[SERVER LOG] Found relevant doc: {doc_content[:30]}...")
+            else:
+                collected_context += "<internal_company_data>\nNo relevant internal documents found.\n</internal_company_data>\n\n"
 
     if "WEB" in decision:
         optimized_query = get_search_query(request.prompt)

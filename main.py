@@ -70,6 +70,12 @@ class SwarmResponse(BaseModel):
     manager_routing: str
     final_answer: str
 
+class DocumentUpload(BaseModel):
+    # For now, we will use a basic password to secure the endpoint.
+    # In a real enterprise app, you would use JWT tokens.
+    admin_password: str
+    content: str
+
 
 # ==========================================
 # 3. CORE AI FUNCTIONS (Unchanged from Phase 10)

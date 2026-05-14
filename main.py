@@ -118,21 +118,39 @@ def get_embedding(text):
         print(f"[ERROR] Hugging Face SDK failed: {e}")
         return None
 
+
 def get_manager_decision(user_text):
     orchestrator_prompt = [
-        {"role": "system", "content": """You are the Orchestrator. Route the user's input.
-You must output ONLY a comma-separated list of departments. DO NOT explain your reasoning.
+        {"role": "system", "content": """You are the Master Routing Orchestrator. 
+Analyze the user's input and route it to the correct departments. 
+Output ONLY a comma-separated list of department names. NO explanations.
+
 ROUTING RULES:
-1. Output 'WEB' for live events, weather, sports, recent news.
-2. Output 'RAG' for internal company data, passwords.
-3. Output 'CHAT' for small talk.
-4. Output 'MATH' for calculation mathematics."""},
+1. 'RAG' : USE THIS FIRST for ANY questions about company data, employees, system architects, databases, roles, passwords, or specific internal facts. If in doubt, include RAG.
+2. 'WEB' : Use for live events, weather, sports, world news, or general web knowledge.
+3. 'MATH' : Use ONLY if there is a mathematical equation to solve.
+4. 'CHAT' : Use ONLY for pure small talk, greetings (e.g., "Hi", "How are you").
+
+EXAMPLES:
+"Who is the CEO?" -> RAG
+"What is the weather in Delhi?" -> WEB
+"Hi there!" -> CHAT
+"Who is the system architect?" -> RAG
+"What is 55 / 2?" -> MATH
+"""},
         {"role": "user", "content": user_text}
     ]
+
     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
     payload = {"model": "llama-3.1-8b-instant", "messages": orchestrator_prompt, "temperature": 0.0}
-    response = requests.post(CLOUD_URL, headers=headers, json=payload)
-    return response.json()["choices"][0]["message"]["content"].strip().upper()
+
+    try:
+        response = requests.post(CLOUD_URL, headers=headers, json=payload, timeout=10)
+        decision = response.json()["choices"][0]["message"]["content"].strip().upper()
+        return decision
+    except Exception as e:
+        print(f"[ERROR] Manager failed: {e}")
+        return "CHAT"  # Safe fallback
 
 # The Micro Agent
 def get_search_query(user_text):

@@ -49,14 +49,14 @@ app.add_middleware(
 active_sessions = {}
 
 # used supabase rpc and hugging face for RAG, dont need chromaDB
-# # Initialize ChromaDB once when the server boots up
-# client = chromadb.Client()
-# collection = client.get_or_create_collection(name="chroma_collection")
-# # Safe add: We use get_or_create so it doesn't crash if it already exists
-# try:
-#     collection.add(documents=["The company wifi password is 'BlueMonkey42'."], ids=["doc1"])
-# except:
-#     pass
+        # # Initialize ChromaDB once when the server boots up
+        # client = chromadb.Client()
+        # collection = client.get_or_create_collection(name="chroma_collection")
+        # # Safe add: We use get_or_create so it doesn't crash if it already exists
+        # try:
+        #     collection.add(documents=["The company wifi password is 'BlueMonkey42'."], ids=["doc1"])
+        # except:
+        #     pass
 
 
 # ==========================================
@@ -73,7 +73,7 @@ class SwarmResponse(BaseModel):
 
 class DocumentUpload(BaseModel):
     # For now, we will use a basic password to secure the endpoint.
-    # In a real enterprise app, you would use JWT tokens.
+    # In a real enterprise app, would use JWT tokens.
     admin_password: str
     content: str
 
@@ -196,7 +196,6 @@ CRITICAL RULES:
 def calculate_math(expression):
     return eval(str(expression))
 
-# Scrape Wikipedia but 100x smarter with duckduckgo
 
 def perform_web_search(query):
     print(f"\n[SERVER LOG] Searching the LIVE WEB via Tavily for: '{query}'")

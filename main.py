@@ -85,8 +85,8 @@ class DocumentUpload(BaseModel):
 def get_embedding(text):
     print(f"[SERVER LOG] Outsourcing embedding translation for: {text[:20]}...")
 
-    # The definitive pipeline URL for feature extraction
-    api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    # UPGRADE: Switching to BAAI's bge-small model. Highly stable, 384 dimensions.
+    api_url = "https://api-inference.huggingface.co/models/BAAI/bge-small-en-v1.5"
 
     hf_key = os.getenv("HUGGINGFACE_API_KEY", "").strip()
     if not hf_key:
@@ -98,23 +98,28 @@ def get_embedding(text):
         "Content-Type": "application/json"
     }
 
-    # The payload MUST be a list of strings for this specific pipeline route
-    payload = {
-        "inputs": [text],
-        "options": {"wait_for_model": True}
-    }
+    # Clean, simple payload structure
+    payload = {"inputs": text}
 
     try:
         response = requests.post(api_url, headers=headers, json=payload, timeout=15)
 
         if response.status_code == 200:
-            # The API returns a list of lists. We want the first vector.
-            return response.json()[0]
+            data = response.json()
+
+            # Hugging Face sometimes nests the math in a double list: [[0.1, 0.2...]]
+            # This logic guarantees we only return the flat vector
+            if isinstance(data, list) and len(data) > 0:
+                if isinstance(data[0], list):
+                    return data[0]
+                return data
+
         else:
-            print(f"[ERROR] Embedding failed: {response.status_code} - {response.text}")
+            print(f"[ERROR] HF API rejected request. Status {response.status_code}: {response.text}")
             return None
+
     except Exception as e:
-        print(f"[ERROR] Connection failed: {e}")
+        print(f"[ERROR] Connection to HuggingFace failed: {e}")
         return None
 
 def get_manager_decision(user_text):

@@ -84,28 +84,35 @@ class DocumentUpload(BaseModel):
 # ==========================================
 
 def get_embedding(text):
-    print(f"[SERVER LOG] Outsourcing embedding translation via SDK for: {text[:20]}...")
-
+    print(f"[SERVER LOG] STARTING EMBEDDING FOR: {text[:20]}...")
     hf_key = os.getenv("HUGGINGFACE_API_KEY", "").strip()
-    if not hf_key:
-        print("[ERROR] HuggingFace API Key is missing!")
-        return None
 
     try:
-        # The SDK dynamically resolves the correct server routing, preventing 404s
         client = InferenceClient(token=hf_key)
-
-        # BAAI/bge-small-en-v1.5 perfectly matches your Supabase 384-dimension limit
+        # We call the model
         vector = client.feature_extraction(text, model="BAAI/bge-small-en-v1.5")
 
-        # The SDK might return an array. We must ensure it's a flat Python list.
+        # DEBUG LOG: This will show us EXACTLY what HF is sending back
+        print(f"[DEBUG] Raw Vector Type: {type(vector)}")
+
+        # Convert to list if it's a numpy array or tensor
         if hasattr(vector, "tolist"):
             vector = vector.tolist()
 
-        if isinstance(vector, list) and len(vector) > 0 and isinstance(vector[0], list):
-            return vector[0]
+        # Ensure it's a flat list of floats
+        if isinstance(vector, list):
+            if len(vector) > 0 and isinstance(vector[0], list):
+                vector = vector[0]  # Flatten if nested
 
-        return vector
+            print(f"[SERVER LOG] Success! Vector length: {len(vector)}")
+            return vector
+
+        print("[ERROR] Vector is not a list or recognizable format.")
+        return None
+
+    except Exception as e:
+        print(f"[ERROR] CRITICAL SDK FAILURE: {e}")
+        return None
 
     except Exception as e:
         print(f"[ERROR] Hugging Face SDK failed: {e}")

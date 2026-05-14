@@ -4,3 +4,4 @@ pydantic
 requests
 python-dotenv
 supabase
+huggingface-hub

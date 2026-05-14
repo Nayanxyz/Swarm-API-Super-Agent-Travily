@@ -84,43 +84,31 @@ class DocumentUpload(BaseModel):
 # ==========================================
 
 def get_embedding(text):
-    print(f"[SERVER LOG] Outsourcing embedding translation for: {text[:20]}...")
-
-    # UPGRADE: Switching to BAAI's bge-small model. Highly stable, 384 dimensions.
-    api_url = "https://api-inference.huggingface.co/models/BAAI/bge-small-en-v1.5"
+    print(f"[SERVER LOG] Outsourcing embedding translation via SDK for: {text[:20]}...")
 
     hf_key = os.getenv("HUGGINGFACE_API_KEY", "").strip()
     if not hf_key:
         print("[ERROR] HuggingFace API Key is missing!")
         return None
 
-    headers = {
-        "Authorization": f"Bearer {hf_key}",
-        "Content-Type": "application/json"
-    }
-
-    # Clean, simple payload structure
-    payload = {"inputs": text}
-
     try:
-        response = requests.post(api_url, headers=headers, json=payload, timeout=15)
+        # The SDK dynamically resolves the correct server routing, preventing 404s
+        client = InferenceClient(token=hf_key)
 
-        if response.status_code == 200:
-            data = response.json()
+        # BAAI/bge-small-en-v1.5 perfectly matches your Supabase 384-dimension limit
+        vector = client.feature_extraction(text, model="BAAI/bge-small-en-v1.5")
 
-            # Hugging Face sometimes nests the math in a double list: [[0.1, 0.2...]]
-            # This logic guarantees we only return the flat vector
-            if isinstance(data, list) and len(data) > 0:
-                if isinstance(data[0], list):
-                    return data[0]
-                return data
+        # The SDK might return an array. We must ensure it's a flat Python list.
+        if hasattr(vector, "tolist"):
+            vector = vector.tolist()
 
-        else:
-            print(f"[ERROR] HF API rejected request. Status {response.status_code}: {response.text}")
-            return None
+        if isinstance(vector, list) and len(vector) > 0 and isinstance(vector[0], list):
+            return vector[0]
+
+        return vector
 
     except Exception as e:
-        print(f"[ERROR] Connection to HuggingFace failed: {e}")
+        print(f"[ERROR] Hugging Face SDK failed: {e}")
         return None
 
 def get_manager_decision(user_text):

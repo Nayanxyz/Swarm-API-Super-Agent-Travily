@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware # 1. Import the tool, to run the node.js file from render
 from supabase import create_client, Client # Tool ko mangwaya
+from huggingface_hub import InferenceClient
 
 load_dotenv()
 API_KEY = os.getenv("GROQ_API_KEY")

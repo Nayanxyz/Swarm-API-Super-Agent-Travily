@@ -76,6 +76,7 @@ class DocumentUpload(BaseModel):
     # For now, we will use a basic password to secure the endpoint.
     # In a real enterprise app, would use JWT tokens.
     admin_password: str
+    user_id: str  # NEW: The API must accept an ID with the upload
     content: str
 
 

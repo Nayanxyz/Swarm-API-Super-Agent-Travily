@@ -34,7 +34,11 @@ with st.sidebar:
                 try:
                     response = requests.post(
                         f"{BASE_API_URL}/upload-doc",
-                        json={"admin_password": admin_password, "content": upload_content}
+                        json={
+                            "admin_password": admin_password,
+                            "user_id": st.session_state.username,
+                            "content": upload_content
+                        }
                     )
 
                     if response.status_code == 200:

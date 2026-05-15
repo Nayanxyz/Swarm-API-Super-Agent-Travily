@@ -344,7 +344,8 @@ async def chat_with_swarm(request: UserRequest):
             # 2. Ask Supabase to find the closest matching document
             results = supabase.rpc(
                 'match_company_docs',
-                {'query_embedding': user_vector, 'match_threshold': 0.3, 'match_count': 1}
+                {'query_embedding': user_vector, 'match_threshold': 0.3,
+                        'match_count': 1, 'p_user_id': request.user_id}        # THE KEY: Hand the security badge to the database
             ).execute()
 
             # 3. If a match is found, add it to the AI's context

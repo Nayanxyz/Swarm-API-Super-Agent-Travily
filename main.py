@@ -115,10 +115,6 @@ def get_embedding(text):
         print(f"[ERROR] CRITICAL SDK FAILURE: {e}")
         return None
 
-    except Exception as e:
-        print(f"[ERROR] Hugging Face SDK failed: {e}")
-        return None
-
 
 def get_manager_decision(user_text):
     orchestrator_prompt = [

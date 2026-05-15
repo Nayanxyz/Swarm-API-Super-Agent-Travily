@@ -446,6 +446,7 @@ async def upload_company_document(doc: DocumentUpload):
     # 3. Save to Supabase pgvector Vault
     try:
         supabase.table("company_docs").insert({
+            "user_id": doc.user_id,  # THE STAMP: Locks this document to this user
             "content": doc.content,
             "embedding": vector_math
         }).execute()

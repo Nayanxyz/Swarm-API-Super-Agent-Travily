@@ -301,3 +301,18 @@ Part 6: The Engine Starter
 
 
 
+Phase 1: Installing the Mathematical Brain
+
+        SQL
+            -- 1. Enable the vector extension
+            create extension if not exists vector;
+
+    What it means: A standard PostgreSQL database only understands text and numbers. It does not understand artificial
+                   intelligence or multi-dimensional geometry. The word extension means a plugin. This line commands the
+                   database to install a highly specialized plugin called pgvector. The if not exists part is a safety check:
+                   it tells the database to only install it if it hasn't been installed already, preventing crashes.
+
+    Connection to Python: In the Python code, the get_embedding() function uses Hugging Face to convert English words into a
+                          list of 384 numbers. Without this vector extension enabled in SQL, the database would reject those
+                          numbers, completely breaking the RAG (Retrieval-Augmented Generation) department.
+

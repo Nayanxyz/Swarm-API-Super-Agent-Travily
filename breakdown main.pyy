@@ -430,3 +430,65 @@ Phase 4: The Enterprise Security Upgrade (Multi-Tenant Architecture)
 
     What it means: The DROP command permanently deletes the old, insecure version of the search radar so it can never be used accidentally.
 
+Phase 5: The Final Secure Search Radar
+
+    The architect now installs the final, upgraded radar that respects the new security walls.
+
+    SQL
+        CREATE OR REPLACE FUNCTION match_company_docs (
+          query_embedding vector(384),
+          match_threshold float,
+          match_count int,
+          p_user_id text -- THE NEW SECURITY KEY
+        )
+
+    The Security Key: The function now demands a fourth input: p_user_id. When the Python code triggers this radar, it is forced to
+                      hand over the ID of the user asking the question.
+
+    SQL
+        RETURNS TABLE ( id bigint, content text, similarity float )
+        LANGUAGE sql STABLE
+        AS $$
+          SELECT
+            company_docs.id,
+            company_docs.content,
+            1 - (company_docs.embedding <=> query_embedding) AS similarity
+          FROM company_docs
+          WHERE 1 - (company_docs.embedding <=> query_embedding) > match_threshold
+            AND company_docs.user_id = p_user_id -- THE ISOLATION WALL: Only return matching user IDs!
+          ORDER BY company_docs.embedding <=> query_embedding
+          LIMIT match_count;
+        $$;
+
+   The Isolation Wall (AND company_docs.user_id = p_user_id): This is the most critical line of code in the entire architecture.
+                                                              Inside the WHERE clause (the filter), the database looks at every document.
+                                                              Even if a document is a 100% perfect mathematical match for the user's question,
+                                                              if the user_id stamped on that document does not perfectly match the p_user_id passed
+                                                              from Python, the database throws the document away and makes it invisible.
+
+    How it perfectly connects to the Python API:
+
+    In the Python file, inside the chat_with_swarm function (The RAG Department), the code reads:
+
+    Python
+
+        results = supabase.rpc(
+            'match_company_docs',
+            {
+                'query_embedding': user_vector,
+                'match_threshold': 0.3,
+                'match_count': 1,
+                'p_user_id': request.user_id
+            }
+        ).execute()
+
+    supabase.rpc: This stands for "Remote Procedure Call." It is Python's way of pressing the launch button on the match_company_docs
+                  SQL function sitting inside Supabase.
+
+    The Translation: The Python API receives a question from a Discord user (e.g., discord_123). The Python Pydantic contract
+                     extracts this ID as request.user_id. Python translates the question to math (user_vector). It then packages the math,
+                     the strictness (0.3), the limit (1), and the Discord user's ID into a JSON package and fires it to Supabase via .execute().
+
+    The Result: The SQL code catches this package, plugs the variables into the $$...$$ logic block, does the geometry, hits
+                the isolation wall to ensure the data is secure, and returns the exact matching text back to Python. Python then wraps
+                it in XML and hands it to the Cloud AI to formulate the final English answer.

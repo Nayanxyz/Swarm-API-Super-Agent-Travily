@@ -94,3 +94,80 @@ Part 3: The Blueprints (Pydantic Data Contracts)
 
         content: str: The text data being uploaded.
 
+Part 4: The Core AI Functions (The Specialized Workers)
+
+    The system has several standalone helper functions. These are like highly specialized workers who sit at their desks
+    waiting for the main program to call their names.
+
+    def get_embedding(text):
+
+        Usage: This function translates English into Math.
+
+        How it works: It takes a text string, grabs the Hugging Face API key, and uses the InferenceClient to send that text
+                      to an AI model named BAAI/bge-small-en-v1.5.
+
+        What is happening: The Hugging Face AI reads the meaning of the text and converts it into a "Vector"—a massive array
+                            of 384 numbers (like [0.012, -0.453, 0.992...]).
+
+        Why we use it: Databases are bad at understanding English, but they are incredibly fast at calculating the distance
+                        between numbers. By turning text into math, the database can later find documents that have a similar
+                        meaning to the user's question. The function uses hasattr(vector, "tolist") and isinstance(vector, list)
+                         to ensure the math array is perfectly flattened before returning it.
+
+    def get_manager_decision(user_text):
+
+        Usage: This is the Routing Orchestrator.
+
+        How it works: It holds a strict orchestrator_prompt that tells the Groq Llama 3.1 AI model to act as a manager.
+                      It sends the user's question to Groq using requests.post.
+
+        What is happening: The AI reads the question and outputs a single word (the routing decision). If the question is
+                           about the CEO, it outputs "RAG". If it is about the weather, it outputs "WEB".
+
+    def get_search_query(user_text):
+
+        Usage: The Micro Agent for web searches.
+
+        How it works: It uses the datetime library to inject today's exact date into a prompt. It sends the prompt to Groq.
+
+        What is happening: It looks at a messy human question like "Can you tell me who won the cricket match yesterday?"
+                           and translates it into a precise, Google-friendly search string like "Cricket match winner May 15 2026".
+                           If the question is not about the web, it outputs the word "NONE".
+
+    def send_to_cloud_ai(history_list):
+
+        Usage: The main communicator. It is the only function responsible for generating final conversational answers.
+
+        How it works: It takes the entire history_list (everything the user and the AI have said to each other) and sends it to Groq.
+
+        The Safety Shield: When the data comes back (data = response.json()), the function checks if "choices" in data:.
+                            Sometimes, cloud APIs crash or run out of memory. If Groq crashes, it won't send the "choices" block.
+                            Instead of letting the entire Python server crash, this if/else statement catches the error gracefully
+                            and returns a polite apology message to the user.
+
+    def compress_memory(history_list):
+
+        Usage: The background janitor.
+
+        How it works: AI models have a limit to how much text they can read at once. If a user chats for a long time,
+                      the memory gets too heavy. This function takes the long conversation, adds a strict prompt telling
+                      the AI to create a "Running Fact Sheet," and passes it to send_to_cloud_ai. It shrinks pages of
+                      conversation into a neat, bulleted summary.
+
+    def calculate_math(expression):
+
+        Usage: Evaluates mathematical equations.
+
+        How it works: It uses Python's native eval() method. If it receives the string "50 / 2", eval() processes
+                        the string as actual code and returns the integer 25.
+
+    def perform_web_search(query):
+
+        Usage: Connects to the live internet.
+
+        How it works: It packages the search query into a JSON payload and uses requests.post to send it to the Tavily API.
+
+        What is happening: Tavily is an AI search engine. It crawls the internet, finds the top 3 articles, and returns them.
+                           The function then uses a for loop (for res in results:) to stitch the titles and text snippets together
+                            into one long string of readable context.
+

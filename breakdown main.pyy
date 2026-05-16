@@ -1,0 +1,40 @@
+Part 1: The Toolbelt (Libraries and Imports)
+
+    Before building the brain, the system must import tools created by other programmers.
+    Each import statement brings a specific tool into the workspace.
+
+    from fastapi import FastAPI: FastAPI is the main framework. It is the "building" where the AI lives. It allows
+                                 the program to create URLs (web addresses) so the outside world can communicate with the Python code.
+
+    from pydantic import BaseModel: Pydantic acts as the strict security guard at the front door. BaseModel is a tool used
+                                    to create strict contracts. If a user tries to send data that does not match the contract,
+                                    Pydantic rejects it automatically.
+
+    import uvicorn: Uvicorn is the engine. While FastAPI builds the house, Uvicorn is the electricity that powers it,
+                    keeping the server awake and listening to the internet 24/7.
+
+    import os: The "Operating System" library. It allows the Python code to look outside of itself and read hidden
+               files on the computer or server, specifically looking for secret passwords.
+
+    import requests: The "telephone" library. Whenever this backend needs to talk to another server
+                    (like Groq's AI or Tavily's search engine), it uses requests to dial their number and send a message over the internet.
+
+    import re: Stands for "Regular Expressions." It is a text-surgeon tool. It is used to scan sentences and carve out
+                very specific patterns (like removing all alphabet letters to leave only math numbers behind).
+
+    from dotenv import load_dotenv: A tool that opens a hidden file named .env and loads the secret API keys into
+                                    the system's memory so they are never written directly in the visible code.
+
+    from datetime import datetime: The digital clock. It allows the system to know exactly what day and year it is,
+                                    which is crucial when the AI searches the web for current events.
+
+    from fastapi.middleware.cors import CORSMiddleware: CORS stands for "Cross-Origin Resource Sharing." By default,
+                                                        web browsers block external websites from talking to servers they don't belong to.
+                                                        This middleware is the "Guest Pass" that allows frontends (like a mobile app or a Streamlit website)
+                                                        to legally enter the API.
+
+    from supabase import create_client, Client: The official toolkit to connect to Supabase, which acts as the system's database (the filing cabinet).
+
+    from huggingface_hub import InferenceClient: The bridge to Hugging Face, an AI platform. This tool is specifically
+                                                 used as a "translator" to convert English words into mathematical numbers.
+

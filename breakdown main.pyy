@@ -38,3 +38,26 @@ Part 1: The Toolbelt (Libraries and Imports)
     from huggingface_hub import InferenceClient: The bridge to Hugging Face, an AI platform. This tool is specifically
                                                  used as a "translator" to convert English words into mathematical numbers.
 
+Part 2: Waking Up the Brain (Initialization)
+
+    After importing the tools, the system must turn them on and connect them.
+
+    load_dotenv(): This command executes the dotenv tool, pulling all secrets from the hidden .env file into the active memory.
+
+    API_KEY & CLOUD_URL: These variables store the secret password to Groq's AI and the exact web address to reach it.
+
+    url & key: These variables store the address and password for the Supabase database.
+
+    supabase: Client = create_client(url, key): This creates a permanent, secure bridge to the Supabase database.
+             The resulting bridge is stored in the supabase variable, which the rest of the code will use whenever it needs to open the filing cabinet.
+
+    app = FastAPI(...): This creates the main server application and gives it a title ("Enterprise Swarm API").
+                        The app variable is the heart of the system.
+
+    app.add_middleware(...): This attaches the CORS tool to the app. By setting allow_origins=["*"], the system explicitly
+                             tells the internet: "I will accept requests from any website or mobile app."
+
+    active_sessions = {}: This creates an empty dictionary (a list of key-value pairs). It acts as the server's short-term RAM.
+                          When users chat, their ongoing conversation history is temporarily stored here so the server can remember
+                          what was said five minutes ago without searching the database every single time.
+

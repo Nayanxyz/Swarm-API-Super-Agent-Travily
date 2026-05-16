@@ -409,3 +409,24 @@ Phase 3: The First Search Radar (The Drafts)
 
     limit match_count: This stops the database from returning thousands of documents, restricting it to exactly the number Python asked for.
 
+Phase 4: The Enterprise Security Upgrade (Multi-Tenant Architecture)
+
+    The previous search function worked perfectly for one person. However, if multiple users connect to the API,
+    they would all share the same database. User A could ask a question and accidentally receive User B's private documents.
+     The architect solved this by building isolation walls.
+
+    SQL
+        -- 1. Add the isolation column to the vault
+        ALTER TABLE company_docs ADD COLUMN user_id TEXT DEFAULT 'admin_global';
+
+    What it means: ALTER TABLE is a command to modify an existing filing cabinet without destroying the data inside it.
+                   ADD COLUMN user_id TEXT creates a new column to store the ID of the person who uploaded the document.
+                   DEFAULT 'admin_global' tells the database: "If there are already older documents in this table from past tests,
+                   just stamp them with 'admin_global' so the system doesn't crash from missing data."
+
+    SQL
+        -- 2. Destroy the old, insecure search function
+        DROP FUNCTION IF EXISTS match_company_docs;
+
+    What it means: The DROP command permanently deletes the old, insecure version of the search radar so it can never be used accidentally.
+

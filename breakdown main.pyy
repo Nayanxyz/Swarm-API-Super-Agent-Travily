@@ -171,3 +171,120 @@ Part 4: The Core AI Functions (The Specialized Workers)
                            The function then uses a for loop (for res in results:) to stitch the titles and text snippets together
                             into one long string of readable context.
 
+Part 5: The API Endpoints (The Main Front Doors)
+
+    Endpoints are the physical URLs where the frontend apps connect to the brain.
+
+    Door 1: The Health Check
+
+        @app.get("/")
+
+        This is a simple entryway. When someone navigates to the root URL of the server, the get method returns a simple
+         JSON message saying the API is live. It does not process any complex data.
+
+    Door 2: The Main Chat Pipeline
+
+        @app.post("/chat", response_model=SwarmResponse)
+
+        This is the massive central nervous system of the app. It uses the @app.post decorator, meaning it expects
+        the frontend to "post" (send) a package of data. The response_model=SwarmResponse tells FastAPI to guarantee
+        the output will strictly match the SwarmResponse blueprint.
+
+        When data enters this function as request: UserRequest, the data begins a complex flow:
+
+        Step 1: Memory Retrieval (Database Fetch)
+            The system checks if request.user_id already exists in the active_sessions RAM. If it does not, it means the user just opened the app.
+
+            supabase.table("messages").select("*"): This command tells the database to select every column (*) from the "messages" drawer.
+
+            .eq("user_id", request.user_id): This is the isolation wall. It filters the database, pulling only the messages
+                                              where the user_id exactly matches the ID of the person asking the question.
+
+            .order("created_at", desc=False): This sorts the messages by time so the conversation timeline remains chronological.
+
+            .execute(): This is a crucial method. All the commands before this just prepare the SQL query. The .execute()
+                        method is the trigger that actually fires the query across the internet to the Supabase servers and waits for the data to return.
+
+            The system then loops through the past messages and loads them into the active_sessions RAM.
+
+        Step 2: Committing the New Message
+
+            The system appends the user's new question (request.prompt) to the RAM memory.
+
+            Then, it permanently saves it to the database using .insert({...}).execute(). The .insert() method packages
+            the data into a new database row. The .execute() method permanently writes it to the hard drive in the cloud.
+
+        Step 3: Background Janitor
+
+            The system checks if len(user_history) > 6:. If the conversation has more than 6 messages, it pauses, calls
+            the compress_memory() worker to summarize the old messages, and replaces the heavy history with a lightweight "Fact Sheet."
+
+        Step 4: The Manager Routing
+
+            The system sends the question to get_manager_decision(). The manager returns a string (e.g., "RAG, WEB").
+            The system creates an empty string called collected_context to hold the data it is about to find.
+
+        Step 5: The Departments (Where the magic happens)
+
+                The system uses if statements to check what the Manager decided.
+
+            The RAG Department (Retrieval-Augmented Generation):
+
+                  If the manager chose RAG, the system must search the private knowledge vault.
+
+                It sends the user's English prompt to get_embedding to turn it into a math vector.
+
+                It uses supabase.rpc('match_company_docs', {...}).execute(). RPC stands for "Remote Procedure Call."
+                Instead of downloading the whole database to search it, rpc tells the Supabase server to run a custom SQL
+                program locally on its own massive processors.
+
+                Inside the RPC package, it passes query_embedding (the math), match_count: 1 (bring back the single best document),
+                and p_user_id: request.user_id. Passing the request.user_id acts as a security badge; the SQL database will physically
+                refuse to return any documents that do not belong to that exact user.
+
+                If a document is found, its text is wrapped in <internal_company_data> XML tags and added to the collected_context.
+
+            The WEB Department:
+
+                If the manager chose WEB, the system calls get_search_query().
+
+                The Elite Filter: The system checks if the micro-agent returned words like "NONE". any(phrase in optimized_query for
+                                  phrase in forbidden_phrases) scans the output. If the query is valid, it calls perform_web_search()
+                                   and wraps the live internet articles in <live_web_data> XML tags, adding them to the collected_context.
+
+            The MATH Department:
+
+                If the manager chose MATH, the system uses re.sub(r'[^0-9\+\-\*\/\(\)\.]', '', request.prompt).
+                This regex method literally deletes every single character from the user's prompt except for numbers and
+                 math symbols (like +, -, *, /). It passes the clean equation to calculate_math(), gets the answer, and
+                 wraps it in <math_calculation> XML tags.
+
+        Step 6: Final Synthesis and Return
+
+            If any department collected data, the system creates a massive final_prompt. This prompt contains strict
+            instructions ("You MUST address every single piece of data"), the XML data collected by the departments, and the original user question.
+
+            It sends this massive package to send_to_cloud_ai().
+
+            The AI generates a brilliant, highly informed answer (ai_words).
+
+            The system uses .insert().execute() one last time to save the AI's answer into the Supabase database.
+
+            Finally, it creates the SwarmResponse package, puts the answer inside it, and sends it back out the door to the user's screen.
+
+    Door 3: The Knowledge Vault Upload
+
+        @app.post("/upload-doc")
+
+        This door is exclusively for saving files to the brain. The frontend sends the DocumentUpload package.
+
+        Security Gate: The system looks at doc.admin_password. If it does not exactly match the secret environment variable,
+                        the system returns an "error" status.
+
+        Vectorization: It passes doc.content to get_embedding(). The Hugging Face AI turns the English document into the 384-dimensional math array.
+
+        Storage: It calls supabase.table("company_docs").insert({...}).execute().
+
+        Crucially, it inserts doc.user_id. By saving the user ID in the same row as the document, it builds the isolation wall.
+        From this moment on, only that specific user ID can ever retrieve this specific document.
+

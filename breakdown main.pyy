@@ -341,3 +341,71 @@ Phase 2: Building the Physical Filing Cabinet
                           runs supabase.table("company_docs").insert(...). The database opens this exact company_docs table,
                           puts the English words into the content column, and puts the Hugging Face math into the embedding column.
 
+Phase 3: The First Search Radar (The Drafts)
+
+    The provided code shows the historical evolution of the system's search radar. The architect initially wrote a function called match_docs, and then refined it into match_company_docs.
+
+    SQL
+        create or replace function match_company_docs (
+          query_embedding vector(384),
+          match_threshold float,
+          match_count int
+        )
+
+    create or replace function: This tells the database to save a custom mini-program inside itself. If the program already exists,
+                                replace tells it to overwrite the old one.
+
+    The Inputs (Parameters): When Python calls this function, it must provide three things:
+
+    query_embedding: The math vector of the user's question.
+
+    match_threshold: A float (a decimal number like 0.3) dictating how strict the match must be.
+
+    match_count: An int (integer) dictating how many documents to bring back.
+
+    SQL
+        returns table (
+          id bigint,  -- <== THE FIX: Changed from uuid to bigint
+          content text,
+          similarity float
+        )
+        language sql stable
+
+    returns table: The function promises to send back a neat table containing the document's id, the content (English text), and a similarity score.
+
+    The Fix (bigint): Earlier in the code, the table was created with a bigserial ID (which is a large number). If the search
+                      function expects a uuid (a random string of letters and numbers) but the table uses numbers, the system crashes.
+                       The architect correctly fixed this by changing the expected output to bigint (a big integer).
+
+    language sql stable: This tells the database engine that the logic is written in standard SQL, and stable means the function
+                         won't accidentally modify or delete data while searching.
+
+    SQL
+
+        as $$
+          select
+            company_docs.id,
+            company_docs.content,
+            1 - (company_docs.embedding <=> query_embedding) as similarity
+          from company_docs
+          where 1 - (company_docs.embedding <=> query_embedding) > match_threshold
+          order by (company_docs.embedding <=> query_embedding) asc
+          limit match_count;
+        $$;
+
+    as $$...$$;: These symbols act as quotation marks that wrap around the actual instructions of the function.
+
+    select ... from company_docs: This commands the database to look inside the filing cabinet and pull out the ID and Content.
+
+    The Math Magic (<=>): In the pgvector language, the <=> symbol calculates the "Cosine Distance" between two vectors.
+                           It measures the physical distance between the user's question and the document in a 384-dimensional space.
+
+    1 - (...) as similarity: Distance is the opposite of similarity. If the distance is 0.2, the code subtracts it from 1 (1.0 - 0.2 = 0.8)
+                             to say the documents are 80% similar.
+
+    where ... > match_threshold: This is a filter. It deletes any results that score lower than the minimum requirement set by Python.
+
+    order by ... asc: This sorts the results from closest distance to furthest distance (asc means ascending).
+
+    limit match_count: This stops the database from returning thousands of documents, restricting it to exactly the number Python asked for.
+

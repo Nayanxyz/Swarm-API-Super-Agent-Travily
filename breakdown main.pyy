@@ -316,3 +316,28 @@ Phase 1: Installing the Mathematical Brain
                           list of 384 numbers. Without this vector extension enabled in SQL, the database would reject those
                           numbers, completely breaking the RAG (Retrieval-Augmented Generation) department.
 
+Phase 2: Building the Physical Filing Cabinet
+
+    SQL
+
+        -- 2. Create a table to hold your internal company documents
+        create table company_docs (
+          id bigserial primary key,
+          content text,
+          embedding vector(384) -- 384 is the exact size of the HuggingFace model we will use
+        );
+
+    create table company_docs: This tells the database to build a new spreadsheet (or filing cabinet) named company_docs.
+
+    id bigserial primary key: Every piece of data needs a unique barcode so it can be found. bigserial means the database
+                                will automatically generate a massive, sequential number (1, 2, 3...) for every new document.
+                                primary key means this number is the official, unchangeable identity of that row.
+
+    content text: This creates a column to hold an unlimited amount of raw English words.
+
+    embedding vector(384): This creates a special column that can only hold an array of exactly 384 mathematical coordinates.
+
+    Connection to Python: When a user uploads a document through the Python @app.post("/upload-doc") endpoint, the Python code
+                          runs supabase.table("company_docs").insert(...). The database opens this exact company_docs table,
+                          puts the English words into the content column, and puts the Hugging Face math into the embedding column.
+

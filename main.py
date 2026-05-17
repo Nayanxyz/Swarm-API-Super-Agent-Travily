@@ -386,23 +386,22 @@ async def chat_with_swarm(request: UserRequest):
             except Exception as e:
                 print(f"[SERVER LOG] MATH failed: {e}")
 
-        # 5. Final Synthesis
+    # 5. Final Synthesis
     if collected_context != "":
-            # [UPGRADE] Add a strict checklist command to the prompt
-            final_prompt = f"""You are a helpful Enterprise AI. Read the XML data provided below. 
-You MUST address every single piece of data provided in the XML tags. 
-Checklist:
-- Did you answer the company data question?
-- Did you answer the live web question?
-- Did you explicitly state the math calculation result?
-Do not mention the XML tags or this checklist to the user. Just provide the answers.
+        # THE FIX: A relaxed, conversational prompt
+        final_prompt = f"""You are a helpful, conversational Enterprise AI. You have been provided with background system data in XML tags below.
+
+CRITICAL RULES:
+1. ONLY use the system data if it directly answers the user's prompt. 
+2. If the user is just chatting normally (e.g., "My name is Nayan", "How are you?"), completely IGNORE the system data and just chat back naturally like a human.
+3. NEVER say "Based on the system data" or mention the XML tags to the user.
 
 SYSTEM DATA:
 {collected_context}
 
 USER PROMPT: {request.prompt}"""
 
-            temp_memory[-1] = {"role": "user", "content": final_prompt}
+        temp_memory[-1] = {"role": "user", "content": final_prompt}
 
     ai_words = send_to_cloud_ai(temp_memory)
 

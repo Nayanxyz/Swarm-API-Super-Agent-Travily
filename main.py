@@ -268,7 +268,7 @@ async def get_user_history(user_id: str):
             .select("role, content") \
             .eq("user_id", user_id) \
             .order("created_at", desc=True) \
-            .limit(50) \
+            .limit(10) \
             .execute()
 
         messages = response.data
@@ -339,13 +339,19 @@ async def chat_with_swarm(request: UserRequest):
     except Exception as e:
         print(f"[DB ERROR] User message fail: {e}")
 
-    # 2. Background Janitor
-    if len(user_history) > 6:
+    # 2. Background Janitor (UPGRADED CONTINUITY ENGINE)
+    # We allow a more natural conversation runway before compressing memory
+    if len(user_history) > 20:
         print(f"[SERVER LOG] Compressing memory for {request.user_id}...")
-        compressed_text = compress_memory(user_history[:-1])
-        active_sessions[request.user_id] = [user_history[0],
-                                            {"role": "system", "content": f"Fact Sheet:\n{compressed_text}"},
-                                            user_history[-1]]
+
+        # Compress the older history data, but preserve the last 4 messages intact
+        compressed_text = compress_memory(user_history[:-5])
+
+        new_memory = [user_history[0]]  # Keep the Base System Prompt
+        new_memory.append({"role": "system", "content": f"Past Conversation Summary:\n{compressed_text}"})
+        new_memory.extend(user_history[-5:])  # Append the recent active dialogue rows
+
+        active_sessions[request.user_id] = new_memory
         user_history = active_sessions[request.user_id]
 
     # 3. Manager Routing

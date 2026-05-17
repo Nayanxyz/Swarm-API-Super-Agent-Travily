@@ -349,8 +349,7 @@ async def chat_with_swarm(request: UserRequest):
                 doc_content = results.data[0]['content']
                 collected_context += f"<internal_company_data>\n{doc_content}\n</internal_company_data>\n\n"
                 print(f"[SERVER LOG] Found relevant doc: {doc_content[:30]}...")
-            else:
-                collected_context += "<internal_company_data>\nNo relevant internal documents found.\n</internal_company_data>\n\n"
+
 
     if "WEB" in decision:
         optimized_query = get_search_query(request.prompt).strip().upper()

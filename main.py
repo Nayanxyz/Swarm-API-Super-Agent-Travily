@@ -367,16 +367,24 @@ async def chat_with_swarm(request: UserRequest):
             print(f"[SERVER LOG] Web search skipped. Agent returned: {optimized_query}")
 
     if "MATH" in decision:
-        math_expression = re.sub(r'[^0-9\+\-\*\/\(\)\.]', '', request.prompt)
-        print(f"[SERVER LOG] MATH Department extracted equation: '{math_expression}'")
-        try:
-            answer = calculate_math(math_expression)
-            print(f"[SERVER LOG] MATH Department calculated: {answer}")
+        # 1. THE TRANSLATOR: Convert English math words to symbols first
+        clean_prompt = request.prompt.lower()
+        clean_prompt = clean_prompt.replace("times", "*").replace("multiplied by", "*").replace("x", "*")
+        clean_prompt = clean_prompt.replace("plus", "+").replace("add", "+")
+        clean_prompt = clean_prompt.replace("minus", "-").replace("subtract", "-")
+        clean_prompt = clean_prompt.replace("divided by", "/").replace("divide", "/")
 
-            # [UPGRADE] Make the math context a full sentence so the AI doesn't ignore it
-            collected_context += f"<math_calculation>\nThe exact mathematical answer to the user's equation is: {answer}\n</math_calculation>\n\n"
-        except Exception as e:
-            print(f"[SERVER LOG] MATH failed: {e}")
+        # 2. THE LOGIC GATE: Now we check the translated prompt
+        if any(op in clean_prompt for op in ['+', '-', '*', '/']):
+            # 3. THE SURGEON: Vacuum up everything except numbers and math symbols
+            math_expression = re.sub(r'[^0-9\+\-\*\/\(\)\.]', '', clean_prompt)
+            print(f"[SERVER LOG] MATH Department extracted equation: '{math_expression}'")
+            try:
+                answer = calculate_math(math_expression)
+                print(f"[SERVER LOG] MATH Department calculated: {answer}")
+                collected_context += f"<math_calculation>\nThe exact mathematical answer to the user's equation is: {answer}\n</math_calculation>\n\n"
+            except Exception as e:
+                print(f"[SERVER LOG] MATH failed: {e}")
 
         # 5. Final Synthesis
     if collected_context != "":

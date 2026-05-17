@@ -256,6 +256,32 @@ def perform_web_search(query):
 async def root():
     return {"message": "Super Agent API is LIVE and running smoothly!"}
 
+
+@app.get("/history/{user_id}")
+async def get_user_history(user_id: str):
+    print(f"\n--- FETCHING HISTORY FOR [{user_id}] ---")
+    try:
+        # 1. Ask Supabase for this user's messages
+        # 2. Order by newest first (desc=True)
+        # 3. Limit to the last 50 messages to prevent phone lag
+        response = supabase.table("messages") \
+            .select("role, content") \
+            .eq("user_id", user_id) \
+            .order("created_at", desc=True) \
+            .limit(50) \
+            .execute()
+
+        messages = response.data
+
+        # 4. Reverse the list so the oldest is at the top and newest is at the bottom of the screen
+        messages.reverse()
+
+        return {"status": "success", "data": messages}
+
+    except Exception as e:
+        print(f"[DB ERROR] Failed to fetch history: {e}")
+        return {"status": "error", "message": "Could not fetch history"}
+
 @app.post("/chat", response_model=SwarmResponse)
 async def chat_with_swarm(request: UserRequest):
     print(f"\n--- NEW REQUEST FROM [{request.user_id}] ---")

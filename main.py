@@ -116,26 +116,24 @@ def get_embedding(text):
         return None
 
 
-def get_manager_decision(user_text):
+def get_manager_decision(user_text, history_list=[]):
+    # 1. Give the Manager context so it doesn't get confused by short prompts like "Why?" or "Show me"
+    recent_context = ""
+    if len(history_list) > 1:
+        # Grab the last 4 messages to establish the topic
+        for msg in history_list[-5:-1]:
+            recent_context += f"{msg['role'].upper()}: {msg['content'][:100]}...\n"
+
     orchestrator_prompt = [
         {"role": "system", "content": """You are the Master Routing Orchestrator. 
-Analyze the user's input and route it to the correct departments. 
-Output ONLY a comma-separated list of department names. NO explanations.
+Analyze the user's input and route it to the correct departments. Output ONLY a comma-separated list of department names. NO explanations.
 
 ROUTING RULES:
-1. 'RAG' : USE THIS FIRST for ANY questions about company data, employees, system architects, databases, roles, passwords, or specific internal facts. If in doubt, include RAG.
-2. 'WEB' : Use for live events, weather, sports, world news, or general web knowledge.
+1. 'RAG' : USE THIS FIRST for ANY questions about company data, rules, internal facts, or if the user says "check database".
+2. 'WEB' : Use for live events, weather, world news, or general web knowledge.
 3. 'MATH' : Use ONLY if there is a mathematical equation to solve.
-4. 'CHAT' : Use ONLY for pure small talk, greetings (e.g., "Hi", "How are you").
-
-EXAMPLES:
-"Who is the CEO?" -> RAG
-"What is the weather in Delhi?" -> WEB
-"Hi there!" -> CHAT
-"Who is the system architect?" -> RAG
-"What is 55 / 2?" -> MATH
-"""},
-        {"role": "user", "content": user_text}
+4. 'CHAT' : Use for pure conversation, follow-up questions to previous topics, or small talk."""},
+        {"role": "user", "content": f"RECENT CHAT HISTORY:\n{recent_context}\n\nUSER'S LATEST PROMPT: {user_text}"}
     ]
 
     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
@@ -143,11 +141,10 @@ EXAMPLES:
 
     try:
         response = requests.post(CLOUD_URL, headers=headers, json=payload, timeout=10)
-        decision = response.json()["choices"][0]["message"]["content"].strip().upper()
-        return decision
+        return response.json()["choices"][0]["message"]["content"].strip().upper()
     except Exception as e:
         print(f"[ERROR] Manager failed: {e}")
-        return "CHAT"  # Safe fallback
+        return "CHAT"
 
 # The Micro Agent
 def get_search_query(user_text):

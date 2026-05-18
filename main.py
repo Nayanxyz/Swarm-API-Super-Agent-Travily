@@ -413,22 +413,16 @@ async def chat_with_swarm(request: UserRequest):
             except Exception as e:
                 print(f"[SERVER LOG] MATH failed: {e}")
 
-    # 5. Final Synthesis
+    # 5. Final Synthesis (UPGRADED)
     if collected_context != "":
-        # THE FIX: A relaxed, conversational prompt
-        final_prompt = f"""You are a helpful, conversational Enterprise AI. You have been provided with background system data in XML tags below.
-
-CRITICAL RULES:
-1. ONLY use the system data if it directly answers the user's prompt. 
-2. If the user is just chatting normally (e.g., "My name is Nayan", "How are you?"), completely IGNORE the system data and just chat back naturally like a human.
-3. NEVER say "Based on the system data" or mention the XML tags to the user.
-
-SYSTEM DATA:
-{collected_context}
-
-USER PROMPT: {request.prompt}"""
-
-        temp_memory[-1] = {"role": "user", "content": final_prompt}
+        # THE FIX: We stop overwriting the user's prompt!
+        # We inject the data as a system whisper right before their question.
+        context_whisper = {
+            "role": "system",
+            "content": f"INTERNAL SYSTEM DATA VAULT:\n{collected_context}\n\nRule: Use this data to help answer the user if relevant. If they are just chatting normally, ignore this data and rely on the conversation history."
+        }
+        # Python's .insert(-1) places this whisper right before the user's last message!
+        temp_memory.insert(-1, context_whisper)
 
     ai_words = send_to_cloud_ai(temp_memory)
 

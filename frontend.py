@@ -13,6 +13,10 @@ BASE_API_URL = "https://swarm-api-super-agent-travily.onrender.com"
 if "username" not in st.session_state:
     st.session_state.username = "nayan_desktop"
 
+# NEW THE FLAG: Tracks whose history we have currently downloaded
+if "history_loaded_for" not in st.session_state:
+    st.session_state.history_loaded_for = None
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 

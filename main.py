@@ -258,24 +258,21 @@ async def root():
 
 
 @app.get("/history/{user_id}")
-async def get_user_history(user_id: str):
-    print(f"\n--- FETCHING HISTORY FOR [{user_id}] ---")
+async def get_user_history(user_id: str, limit: int = 15, offset: int = 0):
+    print(f"\n--- FETCHING HISTORY FOR [{user_id}] | OFFSET: {offset} ---")
     try:
-        # 1. Ask Supabase for this user's messages
-        # 2. Order by newest first (desc=True)
-        # 3. Limit to the last 50 messages to prevent phone lag
+        # .range() is how Supabase handles Pagination (Offset and Limit)
         response = supabase.table("messages") \
             .select("role, content") \
             .eq("user_id", user_id) \
             .order("created_at", desc=True) \
-            .limit(10) \
+            .range(offset, offset + limit - 1) \
             .execute()
 
         messages = response.data
 
-        # 4. Reverse the list so the oldest is at the top and newest is at the bottom of the screen
-        messages.reverse()
-
+        # THE ARCHITECTURAL FIX: We NO LONGER reverse the list!
+        # The new React Native FlatList needs the newest messages at index 0.
         return {"status": "success", "data": messages}
 
     except Exception as e:

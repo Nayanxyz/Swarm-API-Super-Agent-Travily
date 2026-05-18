@@ -348,8 +348,9 @@ async def chat_with_swarm(request: UserRequest):
         active_sessions[request.user_id] = new_memory
         user_history = active_sessions[request.user_id]
 
-    # 3. Manager Routing
-    decision = get_manager_decision(request.prompt)
+    # 3. Manager Routing (UPGRADED)
+    # We now hand the Manager the conversation history so it can read the room!
+    decision = get_manager_decision(request.prompt, user_history)
     print(f"[SERVER LOG] Manager routed to: {decision}")
 
     # 4. The Pipeline

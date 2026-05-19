@@ -28,3 +28,4 @@ try:
         print(f"Raw Output (HTML/Text): {response.text}")
 
 except requests.exceptions.RequestException as e:
+    print(f"FATAL: Network connection failed: {e}")

@@ -12,3 +12,5 @@ data = {
     "content": "CRITICAL DATA: The primary database was upgraded to Supabase. The system architect is Nayan."
 }
 
+print(f"Initiating upload sequence to: {URL}...")
+

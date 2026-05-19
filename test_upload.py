@@ -27,3 +27,4 @@ try:
     except ValueError:
         print(f"Raw Output (HTML/Text): {response.text}")
 
+except requests.exceptions.RequestException as e:

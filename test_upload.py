@@ -14,3 +14,7 @@ data = {
 
 print(f"Initiating upload sequence to: {URL}...")
 
+# 3. THE EXECUTION
+try:
+    response = requests.post(URL, json=data)
+

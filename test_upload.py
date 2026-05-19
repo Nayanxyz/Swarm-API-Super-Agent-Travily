@@ -21,3 +21,6 @@ try:
     print("\n--- TEST RESULTS ---")
     print(f"Status Code: {response.status_code}")
 
+    # We attempt to parse JSON, but catch raw HTML errors if Hugging Face or Render fails
+    try:
+        print(f"Parsed JSON: {response.json()}")

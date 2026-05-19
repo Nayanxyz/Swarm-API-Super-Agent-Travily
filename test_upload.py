@@ -18,3 +18,6 @@ print(f"Initiating upload sequence to: {URL}...")
 try:
     response = requests.post(URL, json=data)
 
+    print("\n--- TEST RESULTS ---")
+    print(f"Status Code: {response.status_code}")
+

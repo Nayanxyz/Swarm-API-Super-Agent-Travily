@@ -24,3 +24,6 @@ try:
     # We attempt to parse JSON, but catch raw HTML errors if Hugging Face or Render fails
     try:
         print(f"Parsed JSON: {response.json()}")
+    except ValueError:
+        print(f"Raw Output (HTML/Text): {response.text}")
+

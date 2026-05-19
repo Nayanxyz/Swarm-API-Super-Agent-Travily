@@ -5,3 +5,10 @@ import requests
 # Do NOT add a trailing slash at the end.
 URL = "https://swarm-api-super-agent-travily.onrender.com/upload-doc"
 
+# 2. THE PAYLOAD
+# This must exactly match your Pydantic DocumentUpload model.
+data = {
+    "admin_password": "*******",
+    "content": "CRITICAL DATA: The primary database was upgraded to Supabase. The system architect is Nayan."
+}
+

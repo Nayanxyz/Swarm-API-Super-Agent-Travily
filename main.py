@@ -190,7 +190,7 @@ def send_to_cloud_ai(history_list):
         # Agar Groq API limit ya memory error de, toh crash hone se bachao
         print(f"[API DANGER] Groq Error: {data}")
         error_msg = data.get('error', {}).get('message', 'Unknown Groq API Error')
-        return f"Arre yaar, AI thak gaya hai (Groq Limit reached). Kuch seconds baad try karo! Error: {error_msg}"
+        return f"Arre yaar, Jango AI thak gaya hai. Kuch seconds baad try karo! Ya fir se Login Karo.." # Error: {error_msg} for error message
 
 
 def compress_memory(history_list):
@@ -307,7 +307,7 @@ async def chat_with_swarm(request: UserRequest):
         # 2. Base System Prompt lagao
         active_sessions[request.user_id] = [
             {"role": "system",
-             "content": "You are the Senior Synthesis AI. Answer clearly using the provided system data."}
+             "content": " Your name is Jango AI. You are the Senior Synthesis AI. Answer clearly using the provided system data."}
         ]
 
         # 3. Agar purani history mili, toh usko RAM mein load karo

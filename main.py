@@ -45,9 +45,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# [API UPGRADE]: We replace st.session_state with a dictionary to hold multiple users.
-active_sessions = {}
+# Saved and retrieve data directly from supabase , dont need active sessions.
+# # [API UPGRADE]: We replace st.session_state with a dictionary to hold multiple users.
+# active_sessions = {}
 
 # used supabase rpc and hugging face for RAG, dont need chromaDB
         # # Initialize ChromaDB once when the server boots up

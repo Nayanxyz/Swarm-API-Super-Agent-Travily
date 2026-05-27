@@ -276,53 +276,39 @@ async def get_user_history(user_id: str, limit: int = 15, offset: int = 0):
         print(f"[DB ERROR] Failed to fetch history: {e}")
         return {"status": "error", "message": "Could not fetch history"}
 
+
 @app.post("/chat", response_model=SwarmResponse)
 async def chat_with_swarm(request: UserRequest):
     print(f"\n--- NEW REQUEST FROM [{request.user_id}] ---")
 
-    # Instead just prompt we used following
+    # 1. READ FROM DATABASE (The Absolute Source of Truth)
+    # We fetch the last 15 messages to give the AI context without overflowing the context window
+    try:
+        db_response = supabase.table("messages") \
+            .select("*") \
+            .eq("user_id", request.user_id) \
+            .order("created_at", desc=False) \
+            .execute()
 
-                #  [API UPGRADE]: Pull up the specific user's memory, or create a new one if they are new
-                # if request.user_id not in active_sessions:
-                #     active_sessions[request.user_id] = [
-                #         {"role": "system",
-                #          "content": "You are the Senior Synthesis AI. Answer clearly using the provided system data."}
-                #     ]
+        # Keep only the last 15 rows to prevent token limits
+        past_messages = db_response.data[-15:] if db_response.data else []
+    except Exception as e:
+        print(f"[DB ERROR] Could not read memory: {e}")
+        past_messages = []
 
-    # [API UPGRADE]: Load memory from Supabase OR create a new one
-    if request.user_id not in active_sessions:
-        print(f"[DB LOG] Checking Supabase for past history of {request.user_id}...")
+    # 2. CONSTRUCT THE RUNNING MEMORY IN TEMPORARY RAM
+    temp_memory = [
+        {"role": "system",
+         "content": "Your name is Jango AI. You are the Senior Synthesis AI. Answer clearly using the provided system data."}
+    ]
 
-        # 1. Supabase se history mango (WITH CHRONOLOGICAL ORDERING)
-        try:
-            # .order("created_at") lagana bohot zaroori hai taaki timeline seedhi rahe
-            # (Agar aapke table mein 'created_at' nahi hai, toh 'id' likh dena)
-            db_response = supabase.table("messages").select("*").eq("user_id", request.user_id).order("created_at",
-                                                                                                      desc=False).execute()
-            past_messages = db_response.data
-        except Exception as e:
-            print(f"[DB ERROR] Could not read memory: {e}")
-            past_messages = []
+    for msg in past_messages:
+        temp_memory.append({"role": msg["role"], "content": msg["content"]})
 
-        # 2. Base System Prompt lagao
-        active_sessions[request.user_id] = [
-            {"role": "system",
-             "content": " Your name is Jango AI. You are the Senior Synthesis AI. Answer clearly using the provided system data."}
-        ]
+    # Add the brand new user message to the memory stack
+    temp_memory.append({"role": "user", "content": request.prompt})
 
-        # 3. Agar purani history mili, toh usko RAM mein load karo
-        if len(past_messages) > 0:
-            print(f"[DB LOG] Found {len(past_messages)} past messages! Loading into RAM...")
-            for msg in past_messages:
-                active_sessions[request.user_id].append({"role": msg["role"], "content": msg["content"]})
-        else:
-            print("[DB LOG] New user. No past history found.")
-
-    # 1. Commit user message to their specific memory
-    user_history = active_sessions[request.user_id]
-    user_history.append({"role": "user", "content": request.prompt})
-
-    # --- NAYI LINE: Supabase mein User ka message bhejo ---
+    # 3. SAVE USER MESSAGE TO DATABASE IMMEDIATELY
     try:
         supabase.table("messages").insert({
             "user_id": request.user_id,
@@ -333,103 +319,61 @@ async def chat_with_swarm(request: UserRequest):
     except Exception as e:
         print(f"[DB ERROR] User message fail: {e}")
 
-    # 2. Background Janitor (UPGRADED CONTINUITY ENGINE)
-    # We allow a more natural conversation runway before compressing memory
-    if len(user_history) > 20:
-        print(f"[SERVER LOG] Compressing memory for {request.user_id}...")
-
-        # Compress the older history data, but preserve the last 4 messages intact
-        compressed_text = compress_memory(user_history[:-5])
-
-        new_memory = [user_history[0]]  # Keep the Base System Prompt
-        new_memory.append({"role": "system", "content": f"Past Conversation Summary:\n{compressed_text}"})
-        new_memory.extend(user_history[-5:])  # Append the recent active dialogue rows
-
-        active_sessions[request.user_id] = new_memory
-        user_history = active_sessions[request.user_id]
-
-    # 3. Manager Routing (UPGRADED)
-    # We now hand the Manager the conversation history so it can read the room!
-    decision = get_manager_decision(request.prompt, user_history)
+    # 4. MANAGER ROUTING
+    decision = get_manager_decision(request.prompt, temp_memory)
     print(f"[SERVER LOG] Manager routed to: {decision}")
 
-    # 4. The Pipeline
-    temp_memory = user_history.copy()
     collected_context = ""
 
+    # 5. THE DEPARTMENT PIPELINE
     if "RAG" in decision:
         print("[SERVER LOG] RAG Department activated. Translating prompt to vector...")
-        # 1. Translate the user's english question into Math (Vector)
         user_vector = get_embedding(request.prompt)
 
         if user_vector:
-            print("[SERVER LOG] Searching Supabase Vault...")
-            # 2. Ask Supabase to find the closest matching document
             results = supabase.rpc(
                 'match_company_docs',
-                {'query_embedding': user_vector, 'match_threshold': 0.3,
-                        'match_count': 1, 'p_user_id': request.user_id}        # THE KEY: Hand the security badge to the database
+                {'query_embedding': user_vector, 'match_threshold': 0.3, 'match_count': 1, 'p_user_id': request.user_id}
             ).execute()
 
-            # 3. If a match is found, add it to the AI's context
             if results.data and len(results.data) > 0:
                 doc_content = results.data[0]['content']
                 collected_context += f"<internal_company_data>\n{doc_content}\n</internal_company_data>\n\n"
-                print(f"[SERVER LOG] Found relevant doc: {doc_content[:30]}...")
-
 
     if "WEB" in decision:
         optimized_query = get_search_query(request.prompt).strip().upper()
-
-        # ELITE FILTER: Check if it's actually a query or just the AI talking
-        # If it's too long, contains 'NONE', or says "NO RELEVANT", we kill it.
         forbidden_phrases = ["NONE", "NO RELEVANT", "NOT SPECIFIED", "SORRY"]
         is_invalid = any(phrase in optimized_query for phrase in forbidden_phrases)
 
         if not is_invalid and len(optimized_query) > 1:
-            print(f"[SERVER LOG] Valid Search Query Found: {optimized_query}")
             live_data = perform_web_search(optimized_query)
             collected_context += f"<live_web_data query='{optimized_query}'>\n{live_data}\n</live_web_data>\n\n"
-        else:
-            print(f"[SERVER LOG] Web search skipped. Agent returned: {optimized_query}")
 
     if "MATH" in decision:
-        # 1. THE TRANSLATOR: Convert English math words to symbols first
-        clean_prompt = request.prompt.lower()
-        clean_prompt = clean_prompt.replace("times", "*").replace("multiplied by", "*").replace("x", "*")
-        clean_prompt = clean_prompt.replace("plus", "+").replace("add", "+")
-        clean_prompt = clean_prompt.replace("minus", "-").replace("subtract", "-")
-        clean_prompt = clean_prompt.replace("divided by", "/").replace("divide", "/")
-
-        # 2. THE LOGIC GATE: Now we check the translated prompt
+        clean_prompt = request.prompt.lower().replace("times", "*").replace("multiplied by", "*").replace("x",
+                                                                                                          "*").replace(
+            "plus", "+").replace("add", "+").replace("minus", "-").replace("subtract", "-").replace("divided by",
+                                                                                                    "/").replace(
+            "divide", "/")
         if any(op in clean_prompt for op in ['+', '-', '*', '/']):
-            # 3. THE SURGEON: Vacuum up everything except numbers and math symbols
             math_expression = re.sub(r'[^0-9\+\-\*\/\(\)\.]', '', clean_prompt)
-            print(f"[SERVER LOG] MATH Department extracted equation: '{math_expression}'")
             try:
                 answer = calculate_math(math_expression)
-                print(f"[SERVER LOG] MATH Department calculated: {answer}")
                 collected_context += f"<math_calculation>\nThe exact mathematical answer to the user's equation is: {answer}\n</math_calculation>\n\n"
             except Exception as e:
-                print(f"[SERVER LOG] MATH failed: {e}")
+                pass
 
-    # 5. Final Synthesis (UPGRADED)
+    # 6. FINAL SYNTHESIS
     if collected_context != "":
-        # THE FIX: We stop overwriting the user's prompt!
-        # We inject the data as a system whisper right before their question.
         context_whisper = {
             "role": "system",
             "content": f"INTERNAL SYSTEM DATA VAULT:\n{collected_context}\n\nRule: Use this data to help answer the user if relevant. If they are just chatting normally, ignore this data and rely on the conversation history."
         }
-        # Python's .insert(-1) places this whisper right before the user's last message!
         temp_memory.insert(-1, context_whisper)
 
     ai_words = send_to_cloud_ai(temp_memory)
 
-    # 6. Final Commit & Return Payload
-    user_history.append({"role": "assistant", "content": ai_words})
-
-    # --- NAYI LINE: Supabase mein AI ka message bhejo ---
+    # 7. SAVE AI RESPONSE TO DATABASE
     try:
         supabase.table("messages").insert({
             "user_id": request.user_id,
@@ -442,11 +386,7 @@ async def chat_with_swarm(request: UserRequest):
 
     print("--- REQUEST COMPLETE ---")
 
-    return SwarmResponse(
-        manager_routing=decision,
-        final_answer=ai_words
-    )
-
+    return SwarmResponse(manager_routing=decision, final_answer=ai_words)
 
 @app.post("/upload-doc")
 async def upload_company_document(doc: DocumentUpload):

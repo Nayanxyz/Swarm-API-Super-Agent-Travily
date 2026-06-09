@@ -102,3 +102,34 @@ python bot.py
 | `/history/{user_id}` | `GET` | Fetches paginated chat history for UI rendering. | `limit` (int), `offset` (int) |
 | `/upload-doc` | `POST` | Embeds text and stores it in the Supabase pgvector vault. | `{ "admin_password": "string", "user_id": "string", "content": "string" }` |
 
+## 🛡️ Database Schema (Supabase)
+You will need to run the following SQL in your Supabase SQL Editor to set up the architecture:
+
+```SQL
+-- Enable Vector Extension
+create extension vector;
+
+-- Messages Table
+create table messages (
+  id uuid default uuid_generate_v4() primary key,
+  user_id text,
+  role text,
+  content text,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- Company Docs (RAG Vault)
+create table company_docs (
+  id uuid default uuid_generate_v4() primary key,
+  user_id text,
+  content text,
+  embedding vector(384), -- BAAI/bge-small-en-v1.5 outputs 384 dimensions
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+```
+
+## 🤝 Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📝 License
+MIT

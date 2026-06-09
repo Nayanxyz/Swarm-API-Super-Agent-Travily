@@ -62,3 +62,33 @@ TAVILY_API_KEY=your_tavily_key
 ADMIN_SECRET_PASSWORD=your_secure_admin_password
 DISCORD_TOKEN=your_discord_bot_token
 ```
+
+Create a .env file in your React Native directory:
+
+```
+EXPO_PUBLIC_API_URL=http://localhost:8000
+```
+### 3. Run the Backend (FastAPI)
+```Bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+### 4. Run the Web Dashboard (Streamlit)
+```Bash
+cd frontend
+pip install streamlit requests
+streamlit run app.py
+```
+### 5. Run the Mobile App (React Native/Expo)
+```Bash
+cd app
+npm install
+npx expo start
+```
+### 6. Run the Discord Bot
+```Bash
+cd bot
+pip install discord python-dotenv requests
+python bot.py
+```

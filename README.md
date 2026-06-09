@@ -1,4 +1,4 @@
-# 🐝 Enterprise AI Swarm (Jango AI)
+# Enterprise AI Swarm (Jango AI)
 
 
 **Enterprise AI Swarm** is a multi-platform, agentic AI architecture powered by FastAPI, Supabase (pgvector), and LLaMA 3. The system acts as a centralized "brain" (Jango) that intelligently routes user queries to specialized micro-agents for web searching, document retrieval (RAG), math calculations, and general conversation. 
@@ -21,9 +21,9 @@ The swarm is accessible from anywhere via three distinct interfaces: a **React N
 * 🗄️ **Persistent Neural Memory:** Chat history is persistently stored and paginated from Supabase, ensuring Jango never loses context across sessions.
 
 <p align="center">
-  <img src="https://via.placeholder.com/400x400?text=Mobile+App+Screenshot" width="45%">
+  <img width="1913" height="806" alt="Screenshot 2026-06-09 133700" src="https://github.com/user-attachments/assets/2f2176eb-ecfe-4c07-98ac-421d06df8d76" />
   &nbsp; &nbsp;
-  <img src="https://via.placeholder.com/400x400?text=Streamlit+Web+Screenshot" width="45%">
+  <img width="1913" height="794" alt="Screenshot 2026-06-09 133747" src="https://github.com/user-attachments/assets/dc911d59-280d-4c14-a1af-87f67835b6ca" />
 </p>
 
 ## 🛠️ Tech Stack

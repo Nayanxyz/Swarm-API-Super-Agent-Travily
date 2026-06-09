@@ -92,3 +92,13 @@ cd bot
 pip install discord python-dotenv requests
 python bot.py
 ```
+
+## 📡 API Documentation
+
+| Endpoint | Method | Description | Payload / Params |
+| :--- | :--- | :--- | :--- |
+| `/` | `GET` | Health Check | None |
+| `/chat` | `POST` | Core Swarm interface. Routes prompt and returns AI synthesis. | `{ "user_id": "string", "prompt": "string" }` |
+| `/history/{user_id}` | `GET` | Fetches paginated chat history for UI rendering. | `limit` (int), `offset` (int) |
+| `/upload-doc` | `POST` | Embeds text and stores it in the Supabase pgvector vault. | `{ "admin_password": "string", "user_id": "string", "content": "string" }` |
+
